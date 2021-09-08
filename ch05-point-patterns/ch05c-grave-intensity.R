@@ -99,3 +99,9 @@ contour(ug, vg, kmat, asp = 1, nlevels = 4)
 k2 <- MASS::kde2d(af_coords$u, af_coords$v, h = c(buaf, bvaf) * 4, n = 128, lims = c(range(ug), range(vg)))
 contour(k2, nlevels = 4, asp = 1)
 
+# how to get estimated intensity
+contour(density(pprec[af,], sigma = c(buaf, bvaf), edge = FALSE),
+        nlevels = 4, main = "Affected intensity (no edge correction)")
+# plot estimated density
+contour(ug, vg, kmat * 30, asp = 1, nlevels = 4, main = "Affected intensity (manual)")
+

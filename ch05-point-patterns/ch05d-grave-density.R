@@ -1,6 +1,6 @@
 library(spatstat) # for inference on spatial point processes
 library(smacpod)
-data(grave, package <- "smacpod") # import data in ppp format
+data(grave, package = "smacpod") # import data in ppp format
 
 # determine affected and unaffected sides
 af <- which(grave$marks == "affected")
