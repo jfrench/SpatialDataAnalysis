@@ -19,6 +19,12 @@ bvaf <- sd(grave$y[af])*length(af)^(-1/(dim+4))
 buun <- sd(grave$x[un])*length(un)^(-1/(dim+4))
 bvun <- sd(grave$y[un])*length(un)^(-1/(dim+4))
 
+# or
+bw.scott(grave[af,])
+c(buaf, bvaf)
+bw.scott(grave[un,])
+
+
 # density estimated for affected and unaffected groups
 # using associated bandwidths from Scott's rule
 iaf <-  spdensity(grave[af,], sigma = c(buaf, bvaf))

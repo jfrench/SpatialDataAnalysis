@@ -38,8 +38,8 @@ set.seed(1)
 
 # x is a ppp
 # nsim is the number of simulation from which to construct
-# the tolerance envelopes
-# level is the tolerance level of the envelopes
+# the envelopes
+# level is the quantile level of the envelopes
 # ... is additional arguments passed to Lest
 lplot <- function(x, nsim = 500, level = 0.95,
                   correction = "Ripley", ...) {
@@ -159,7 +159,7 @@ legend("topleft",
 # clustered at any scale for 0 <= h <= 2000
 # in rectangular domain
 r <- seq(0, 2000, len = 201)
-Tobs <- max(spatat.core::Lest(pppafpol, r = r, correction = "Ripley")$iso - r)
+Tobs <- max(spatstat.core::Lest(pppafpol, r = r, correction = "Ripley")$iso - r)
 # relabel affected events,
 # then compute max(Lhat(h) - h)
 # for relabeled data
