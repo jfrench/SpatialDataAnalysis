@@ -5,8 +5,7 @@ library(smerc)
 # Apply Tango's index to NY leukemia data
 ############################################
 # read in ny data
-setwd("~/OneDrive - The University of Colorado Denver/Teaching/Math4027/Data/")
-nydf <- read.table("NYTRACT.dat")
+nydf <- read.table("./data/NYTRACT.dat")
 names(nydf) = c("x", "y", "pop", "cases")
 
 ###################################################
@@ -72,31 +71,11 @@ plot(gof, sa)
 # Monte Carlo p-values
 
 # compare monte carlo p-value to chi-square approximation p-value
-tango_mc1 <-  tango.test(cases, pop, w1r, nsim = 9999)
-psim1 <- (1 + sum(tango_mc1$tstat.sim >= tango_mc1$tstat))/(1 + 9999)
-print(paste("chi-square p: ", round(tango_1$pvalue.chisq,5),
-            ", MC p: ",round(psim1, 5)))
-
-tango_mc7 <-  tango.test(cases, pop, w7r, nsim = 9999)
-psim7 <- (1 + sum(tango_mc7$tstat.sim >= tango_mc7$tstat))/(1 + 9999)
-print(paste("chi-square p: ", round(tango_7$pvalue.chisq,5),
-            ", MC p: ",round(psim7, 5)))
-
-tango_mc10 <-  tango.test(cases, pop, w10r, nsim = 9999)
-psim10 <- (1 + sum(tango_mc10$tstat.sim >= tango_mc10$tstat))/(1 + 9999)
-print(paste("chi-square p: ", round(tango_10$pvalue.chisq,5),
-            ", MC p: ",round(psim10, 5)))
-
-tango_mc15 <-  tango.test(cases, pop, w15r, nsim = 9999)
-psim15 <- (1 + sum(tango_mc15$tstat.sim >= tango_mc15$tstat))/(1 + 9999)
-print(paste("chi-square p: ", round(tango_15$pvalue.chisq,5),
-            ", MC p: ",round(psim15, 5)))
-
-
-tango_mc20 <-  tango.test(cases, pop, w20r, nsim = 9999)
-psim20 <- (1 + sum(tango_mc20$tstat.sim >= tango_mc20$tstat))/(1 + 9999)
-print(paste("chi-square p: ", round(tango_20$pvalue.chisq,5),
-            ", MC p: ",round(psim20, 5)))
+(tango_mc1 <-  tango.test(cases, pop, w1r, nsim = 9999))
+(tango_mc7 <-  tango.test(cases, pop, w7r, nsim = 9999))
+(tango_mc10 <-  tango.test(cases, pop, w10r, nsim = 9999))
+(tango_mc15 <-  tango.test(cases, pop, w15r, nsim = 9999))
+(tango_mc20 <-  tango.test(cases, pop, w20r, nsim = 9999))
 
 # comparing gof and sa components of tango's index for the observed
 # data to the simulated data

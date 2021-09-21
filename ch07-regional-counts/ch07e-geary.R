@@ -1,34 +1,35 @@
-# install.packages(spdep", "rgdal",)
+# install.packages(spdep", "sf")
 library(spdep)
-library(rgdal)
+library(sf)
 
-# read in data
-setwd("~/OneDrive - The University of Colorado Denver/Teaching/Math4027/Data/NY_data")
-NY8 <- readOGR(".", "NY8_utm18")
-NY_nb <- read.gal("NY_nb.gal", region.id = row.names(NY8))
+# read shapefile for new york counties
+ny8 <- sf::st_read("./data/NY_data/ny8_utm18.shp")
+# read neighbor information
+ny_nb <- spdep::read.gal("./data/NY_data/NY_nb.gal", override.id = TRUE)
 
-setwd("~/OneDrive - The University of Colorado Denver/Teaching/Math4027/Data/")
-nydf = read.table("NYtract.dat")
-names(nydf) = c("x", "y", "Population", "Observed")
+# plot region boundaries from ny8
+plot(st_geometry(ny8), border="grey60")
+# plot neighbors
+plot(ny_nb, coords = st_centroid(st_geometry(ny8)),
+     add=TRUE, col="blue", pch = 19, cex = 0.6)
 
 ### geary's c
 # assume adjacency weights (w_ij = 1 if regions i and j share a boundary)
 # proximity matrix, binary style.  W is row standardized.
-W = nb2mat(NY_nb, style = "B")
+w = nb2mat(ny_nb, style = "B")
 # see ?nb2listw for more options
 # proximaty matrix in list format
-lw = nb2listw(NY_nb, style = "B")
+lw = nb2listw(ny_nb, style = "B")
 
-# base test w/ normality approximation for p-value
-geary.test(NY8$Cases, listw = lw, randomisation = FALSE)
+geary.test(ny8$Cases, listw = lw, randomisation = FALSE)
 # base test w/ randomization p-value
-geary.mc(NY8$Cases, listw = lw, nsim = 499)
+geary.mc(ny8$Cases, listw = lw, nsim = 499)
 
 # base test w/ Monto Carlo p-value, simulating data under constant risk hypothesis
 # some preliminaries
-N = length(NY8$Cases) # number of regions
-y = NY8$Cases # number of cases
-n = NY8$POP8 #population sizes
+N = length(ny8$Cases) # number of regions
+y = ny8$Cases # number of cases
+n = ny8$POP8 #population sizes
 r <- sum(y)/sum(n) # estimated risk
 rni <- r * n # expected per region
 

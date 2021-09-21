@@ -1,26 +1,26 @@
-# install.packages("spdep", "rgdal", "RColorBrewer", "SpatialEpi)
+# install.packages("spdep", "sf", "smerc", "RColorBrewer")
 library(spdep)
-library(rgdal)
+library(sf)
 library(smerc)
 
-# note that the Besag-Newell method in SpatialEpi is modified from the
-# description in the book.
-setwd("~/Dropbox/UCD_Files/Teaching/Math4027/Data/NY_data")
-NY8 <- readOGR(".", "NY8_utm18")
-NY_nb <- read.gal("NY_nb.gal", region.id=row.names(NY8))
 
-# plot regions
-plot(NY8, border="grey60", axes=TRUE)
+# read shapefile for new york counties
+ny8 <- sf::st_read("./data/NY_data/NY8_utm18.shp")
+# read neighbor information
+ny_nb <- spdep::read.gal("./data/NY_data/NY_nb.gal", override.id = TRUE)
+
+# plot region boundaries from ny8
+plot(st_geometry(ny8), border="grey60")
 # plot neighbors
-plot(NY_nb, coordinates(NY8), pch = 19, cex = 0.6, add = TRUE)
+plot(ny_nb, coords = st_centroid(st_geometry(ny8)),
+     add=TRUE, col="blue", pch = 19, cex = 0.6)
 
 # read in data
-setwd("~/Dropbox/UCD_Files/Teaching/Math4027/Data/")
-nydf = read.table("NYtract.dat")
+nydf = read.table("./data/NYtract.dat")
 names(nydf) = c("x", "y", "Population", "Observed")
 coords = nydf[,c("x", "y")]
 
-# note that is you use the x, y coordinates of NY8 (coordinates(NY8))
+# note that is you use the x, y coordinates of ny8 (sf::st_centroids(ny8))
 # you may get different results since the coordinates
 # have been projected to the UTM coordinate system
 # We have sought to match the book's results
@@ -32,10 +32,11 @@ coords = nydf[,c("x", "y")]
 # nstar is the number of at-risk person to include in the circle radius
 # alpha is the significance level for which to identify a cluster
 cepp1000 = cepp.test(coords = coords,
-              cases = nydf$Observed,
-              pop = nydf$Population,
-              nstar = 1000,
-              alpha = 0.10)
+                     cases = nydf$Observed,
+                     pop = nydf$Population,
+                     nstar = 1000,
+                     alpha = 0.10)
+
 cepp5000 = cepp.test(coords = coords,
                      cases = nydf$Observed,
                      pop = nydf$Population,
@@ -59,18 +60,40 @@ cepp40000 = cepp.test(coords = coords,
 # look at x$clusters to see them all
 
 # plot likeliest clusters
-plot(NY8, border = "grey60", axes = TRUE, col = color.clusters(cepp1000))
+# pretty plot
+plot(sf::st_geometry(ny8), border = "grey60", axes = TRUE,
+     col = color.clusters(cepp1000))
 legend("topright", legend = c("n* = 1000"))
+# basic plot
 plot(cepp1000)
+# basic info
+cepp1000
+# cluster info
+summary(cepp1000)
 
-plot(NY8, border = "grey60", axes = TRUE, col = color.clusters(cepp5000))
+
+plot(sf::st_geometry(ny8), border = "grey60", axes = TRUE,
+     col = color.clusters(cepp5000))
 legend("topright", legend = c("n* = 5000"))
 plot(cepp5000)
+# basic info
+cepp5000
+# cluster info
+summary(cepp5000)
 
-plot(NY8, border="grey60", axes = TRUE, col = color.clusters(cepp10000))
+plot(sf::st_geometry(ny8), border="grey60", axes = TRUE,
+     col = color.clusters(cepp10000))
 legend("topright", legend = c("n* = 10000"))
 plot(cepp10000)
+# basic info
+cepp10000
+# cluster info
+summary(cepp10000)
 
-plot(NY8, border="grey60", axes = TRUE, col = color.clusters(cepp40000))
+plot(sf::st_geometry(ny8), border="grey60", axes = TRUE,
+     col = color.clusters(cepp40000))
 legend("topright", legend = c("n* = 40000"))
-plot(cepp40000)
+# basic info
+cepp40000
+# cluster info
+summary(cepp40000)

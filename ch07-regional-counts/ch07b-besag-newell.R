@@ -1,26 +1,25 @@
-# install.packages("spdep", "rgdal", "RColorBrewer", "SpatialEpi)
 library(spdep)
-library(rgdal)
+library(sf)
 library(smerc)
+library(RColorBrewer)
 
-# note that the Besag-Newell method in SpatialEpi is modified from the
-# description in the book.
-setwd("~/Dropbox/UCD_Files/Teaching/Math4027/Data/NY_data")
-NY8 <- readOGR(".", "NY8_utm18")
-NY_nb <- read.gal("NY_nb.gal", region.id=row.names(NY8))
+# read shapefile for new york counties
+ny8 <- sf::st_read("./data/NY_data/NY8_utm18.shp")
+# read neighbor information
+ny_nb <- spdep::read.gal("./data/NY_data/NY_nb.gal", override.id = TRUE)
 
-# plot regions
-plot(NY8, border="grey60", axes=TRUE)
+# plot region boundaries from ny8
+plot(st_geometry(ny8), border="grey60")
 # plot neighbors
-plot(NY_nb, coordinates(NY8), pch = 19, cex = 0.6, add = TRUE)
+plot(ny_nb, coords = st_centroid(st_geometry(ny8)),
+     add=TRUE, col="blue", pch = 19, cex = 0.6)
 
 # read in data
-setwd("~/Dropbox/UCD_Files/Teaching/Math4027/Data/")
-nydf = read.table("NYtract.dat")
+nydf = read.table("./data/NYtract.dat")
 names(nydf) = c("x", "y", "Population", "Observed")
 coords = nydf[,c("x", "y")]
 
-# note that is you use the x, y coordinates of NY8 (coordinates(NY8))
+# note that is you use the x, y coordinates of ny8 (sf::st_centroids(ny8))
 # you may get different results since the coordinates
 # have been projected to the UTM coordinate system
 # We have sought to match the book's results
@@ -37,21 +36,32 @@ bn6 = bn.test(coords = coords,
               pop = nydf$Population,
               cstar = 6,
               alpha = 0.01)
+bn6 # simple info
+summary(bn6) # cluster info
+
 bn12 = bn.test(coords = coords,
                cases = nydf$Observed,
                pop = nydf$Population,
                cstar = 12,
                alpha = 0.01)
+bn12
+summary(bn12)
+
 bn17 = bn.test(coords = coords,
                cases = nydf$Observed,
                pop = nydf$Population,
                cstar = 17,
                alpha = 0.01)
+bn17
+summary(bn17)
+
 bn23 = bn.test(coords = coords,
                cases = nydf$Observed,
                pop = nydf$Population,
                cstar = 23,
                alpha = 0.01)
+bn23
+summary(bn23)
 
 # Note:  we generally get a lot of clusters
 # we only look at the most likely one
@@ -70,7 +80,7 @@ display.brewer.all(type = "qual", colorblindFriendly = TRUE)
 mycol = brewer.pal(4, "Dark2")
 # create vector of colors to show results
 # default is white (no clustering)
-nycol = rep("black", nrow(nydf))
+nycol = rep("white", nrow(nydf))
 # the most likely cluster locations are lightorange for cstar = 12
 nycol[bn12$clusters[[1]]$locids] = mycol[2]
 # the most likely cluster locations are lightgreen for cstar = 17
@@ -81,17 +91,17 @@ nycol[bn6$clusters[[1]]$locid] = mycol[4]
 nycol[bn23$clusters[[1]]$location] = mycol[3]
 
 # plot most likely clusters
-plot(NY8, border="grey60", axes = TRUE, col = nycol)
+plot(st_geometry(ny8), border="grey60", axes = TRUE, col = nycol)
 legend("topright",
        legend = c("Cluster k = 6, 17", "Cluster k = 12",
                   "Cluster k = 17", "Cluster k = 23"),
        lwd = 10, col = mycol)
 
 # look more closely at most likely cluster information
-bn6$clusters[[1]]
-bn12$clusters[[1]]
-bn17$clusters[[1]]
-bn23$clusters[[1]]
+bn6$clusters[[1]][c("cases", "population", "pvalue")]
+bn12$clusters[[1]][c("cases", "population", "pvalue")]
+bn17$clusters[[1]][c("cases", "population", "pvalue")]
+bn23$clusters[[1]][c("cases", "population", "pvalue")]
 
 # summary of results
 # (the book seems to have incorrect p-values based on using
