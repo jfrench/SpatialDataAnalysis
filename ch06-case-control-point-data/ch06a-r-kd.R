@@ -4,6 +4,7 @@ set.seed(1)
 library(smacpod)
 data(grave)
 
+# selection to graves that are affected
 af = which(grave$marks == "affected")
 # estimate densities of cases and controls, respectively,
 # using bandwidth of 700
@@ -39,6 +40,12 @@ load("renv350.rda")
 # image plot showing regions where r350 is outside
 # tolerance envelopes
 plot(renv350)
+
+# a better color scale (in my opinion)
+# making it easier to distguish the clusters of cases relative
+# to controls (red) and vice versa (blue)
+grad = gradient.color.scale(min(renv350$v, na.rm = TRUE), max(renv350$v, na.rm = TRUE))
+plot(renv350, col = grad$col, breaks = grad$breaks)
 
 ## global test that spatial densities of cases/controls
 # are the same
