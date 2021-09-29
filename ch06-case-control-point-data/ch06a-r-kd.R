@@ -18,7 +18,7 @@ title("Affected, bandwidth = 700")
 contour(g700, nlevels = 15, main = "")
 title("Nonaffected, bandwidth = 700")
 # log ratio of spatial densities
-r700 = logrr(grave, case = 2, sigma = 700)
+r700 = logrr(grave, case = "affected", sigma = 700)
 # contour plot of r700 (lty and lwd determined
 # by experimentation)
 contour(r700, lty = c(1, 1, 1, 1, 2, 1),
@@ -52,7 +52,7 @@ plot(renv350, col = grad$col, breaks = grad$breaks)
 logrr.test(renv350)
 
 # construct 95% tolerance envelopes for bandwidth of 700
-renv700 = logrr(grave, case = 2, nsim = 999, sigma = 700,
+renv700 = logrr(grave, case = "affected", nsim = 999, sigma = 700,
                 nyx = c(60, 60), level = 0.95)
 save(renv700, file = "renv700.rda")
 load("renv700.rda")
@@ -68,8 +68,11 @@ kd = kdest(grave, case = 2)
 plot(kd, cbind(iso, theo) ~ r, legend = FALSE, main = "")
 
 # construct envelopes using 499 randomly labeled data sets
+# r is chosen to match the book example. In general,
+# you shouldn't specify r unless you know what spatial scales
+# you want to consider.
 nsim = 499
-kdenv = kdest(grave, case = 2, nsim = 499,
+kdenv = kdest(grave, case = "affected", nsim = 499,
               r = seq(0, 2000, len = 201),
               level = 0.95)
 save(kdenv, file = "kdenv.rda")
@@ -80,5 +83,6 @@ legend("topleft", legend = c("obs", "avg", "max/min env", "95% env"),
        lty = c(1, 2, 1, 2), col = c("black", "red", "gray56", "lightgrey"),
        lwd = c(1, 1, 10, 10))
 
-# KD+ global test that spatial densities are the same
+# KD+ global test that cases tend to occur near other cases in the same
+# manner that controls tend to occur near other controls across many spatial scales
 kdplus.test(kdenv)
