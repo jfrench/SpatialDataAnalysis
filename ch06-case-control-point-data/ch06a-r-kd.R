@@ -83,6 +83,9 @@ legend("topleft", legend = c("obs", "avg", "max/min env", "95% env"),
        lty = c(1, 2, 1, 2), col = c("black", "red", "gray56", "lightgrey"),
        lwd = c(1, 1, 10, 10))
 
-# KD+ global test that cases tend to occur near other cases in the same
-# manner that controls tend to occur near other controls across many spatial scales
+# KD+ global test
+# H0: cases tend to occur near other cases in the same manner that controls
+# tend to occur near other controls across many spatial scales
+# Ha: cases tend to occur near other cases more frequently than controls tend to
+# occur near controls across many spatial scales
 kdplus.test(kdenv)
