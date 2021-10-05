@@ -15,7 +15,7 @@ plot(scan, chars = c(1, 20), main = "most likely cluster for grave data",
 # extract most likely and other significant clusters
 clusters(scan)
 
-# if there were more than 2 clusters ....
+# if there were more than 1 cluster ....
 scan2 = spscan.test(grave, nsim = 999, case = "affected", alpha = 0.8)
 summary(scan2)
 plot(scan2, chars = c(1, 20), main = "detected clusters for grave data",
