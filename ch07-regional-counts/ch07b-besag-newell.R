@@ -38,6 +38,7 @@ bn6 = bn.test(coords = coords,
               alpha = 0.01)
 bn6 # simple info
 summary(bn6) # cluster info
+clusters(bn6)
 
 bn12 = bn.test(coords = coords,
                cases = nydf$Observed,
@@ -46,6 +47,7 @@ bn12 = bn.test(coords = coords,
                alpha = 0.01)
 bn12
 summary(bn12)
+clusters(bn12)
 
 bn17 = bn.test(coords = coords,
                cases = nydf$Observed,
@@ -54,6 +56,7 @@ bn17 = bn.test(coords = coords,
                alpha = 0.01)
 bn17
 summary(bn17)
+clusters(bn17)
 
 bn23 = bn.test(coords = coords,
                cases = nydf$Observed,
@@ -62,6 +65,7 @@ bn23 = bn.test(coords = coords,
                alpha = 0.01)
 bn23
 summary(bn23)
+clusters(bn23)
 
 # Note:  we generally get a lot of clusters
 # we only look at the most likely one
@@ -69,10 +73,10 @@ summary(bn23)
 
 # notice that the most likely clusters for different k
 # largely overlap
-bn6$clusters[[1]]$locids
-bn12$clusters[[1]]$locids
-bn17$clusters[[1]]$locids
-bn23$clusters[[1]]$locids
+clusters(bn6)[[1]]
+clusters(bn12)[1:2]
+clusters(bn17)[1:2]
+clusters(bn23)[1:2]
 
 library(RColorBrewer) # useful for determining plotting colors
 # look at qualitative color mapping that is colorblind friendly
@@ -84,11 +88,11 @@ nycol = rep("white", nrow(nydf))
 # the most likely cluster locations are lightorange for cstar = 12
 nycol[bn12$clusters[[1]]$locids] = mycol[2]
 # the most likely cluster locations are lightgreen for cstar = 17
-nycol[bn6$clusters[[1]]$locid] = mycol[1]
+nycol[bn6$clusters[[1]]$locids] = mycol[1]
 # the most likely cluster locations are magenta for cstar = 6, 17
-nycol[bn6$clusters[[1]]$locid] = mycol[4]
+nycol[bn6$clusters[[1]]$locids] = mycol[4]
 # the most likely cluster locations are lightpurple for cstar = 23
-nycol[bn23$clusters[[1]]$location] = mycol[3]
+nycol[bn23$clusters[[1]]$locids] = mycol[3]
 
 # plot most likely clusters
 plot(st_geometry(ny8), border="grey60", axes = TRUE, col = nycol)

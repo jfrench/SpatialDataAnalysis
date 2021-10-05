@@ -34,8 +34,8 @@ scan = scan.test(coords = coords,
 
 # results from the test are available in
 summary(scan)
-# individual cluster information (cluster 1)
-scan$clusters[[1]]$locids
+# cluster information
+clusters(scan)
 
 # library(RColorBrewer) # useful for determining plotting colors
 # # look at qualtitative color mapping that is colorblind friendly

@@ -3,7 +3,6 @@ library(spdep)
 library(sf)
 library(smerc)
 
-
 # read shapefile for new york counties
 ny8 <- sf::st_read("./data/NY_data/NY8_utm18.shp")
 # read neighbor information
@@ -70,6 +69,7 @@ plot(cepp1000)
 cepp1000
 # cluster info
 summary(cepp1000)
+clusters(cepp1000)
 
 
 plot(sf::st_geometry(ny8), border = "grey60", axes = TRUE,
@@ -80,6 +80,7 @@ plot(cepp5000)
 cepp5000
 # cluster info
 summary(cepp5000)
+clusters(cepp5000)
 
 plot(sf::st_geometry(ny8), border="grey60", axes = TRUE,
      col = color.clusters(cepp10000))
@@ -89,6 +90,7 @@ plot(cepp10000)
 cepp10000
 # cluster info
 summary(cepp10000)
+clusters(cepp10000)
 
 plot(sf::st_geometry(ny8), border="grey60", axes = TRUE,
      col = color.clusters(cepp40000))
@@ -97,3 +99,4 @@ legend("topright", legend = c("n* = 40000"))
 cepp40000
 # cluster info
 summary(cepp40000)
+clusters(cepp40000)
