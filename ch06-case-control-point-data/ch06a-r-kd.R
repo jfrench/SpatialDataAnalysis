@@ -77,15 +77,18 @@ kdenv = kdest(grave, case = "affected", nsim = 499,
               level = 0.95)
 save(kdenv, file = "kdenv.rda")
 load("kdenv.rda")
+# print some information about kdenv
+print(kdenv)
+# determine distances KD(r) outside 95% tolerance envelopes
+summary(kdenv)
+# plot results
 plot(kdenv, ylab = "difference in K functions",
      xlim = c(0, 2000))
 legend("topleft", legend = c("obs", "avg", "max/min env", "95% env"),
-       lty = c(1, 2, 1, 2), col = c("black", "red", "gray56", "lightgrey"),
+       lty = c(1, 2, 1, 2), col = c("black", "red", "darkgrey", "lightgrey"),
        lwd = c(1, 1, 10, 10))
 
 # KD+ global test
-# H0: cases tend to occur near other cases in the same manner that controls
-# tend to occur near other controls across many spatial scales
-# Ha: cases tend to occur near other cases more frequently than controls tend to
-# occur near controls across many spatial scales
+# H0: KD(r) = 0 for all r considered
+# Ha: KD(r) > 0 for at least one r considered
 kdplus.test(kdenv)

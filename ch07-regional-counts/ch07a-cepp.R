@@ -5,6 +5,7 @@ library(smerc)
 
 # read shapefile for new york counties
 ny8 <- sf::st_read("./data/NY_data/NY8_utm18.shp")
+
 # read neighbor information
 ny_nb <- spdep::read.gal("./data/NY_data/NY_nb.gal", override.id = TRUE)
 
