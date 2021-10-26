@@ -15,7 +15,7 @@ plot(ny_nb, coords = st_centroid(st_geometry(ny8)),
 
 ### moran's i
 # assume adjacency weights (w_ij = 1 if regions i and j share a boundary)
-# proximity matrix, binary style.  W is row standardized.
+# proximity matrix, B = binary adjacency matrix.  W is row standardized.
 w = nb2mat(ny_nb, style = "B")
 # see ?nb2listw for more options
 # proximaty matrix in list format
