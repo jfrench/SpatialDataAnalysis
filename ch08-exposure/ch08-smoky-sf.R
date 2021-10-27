@@ -1,11 +1,10 @@
-# install.packages(c("gstat", "geoR", "rgdal", "sp", "gridExtra", "sf", "colorspace"))
+# install.packages(c("gstat", "geoR", "fields", "maptools", "gridExtra"))
 library(gstat) # for most of the work
 library(geoR) # for estimating anisotropy
 library(sp)
-library(rgdal)
 library(sf)
-library(colorspace)
 
+# set working directory
 ### some notes
 # a dataframe (df) can be turned into a SpatialPointsDataFrame
 # using the command coordinates(df) <- c("x", "y") where
@@ -31,22 +30,22 @@ library(colorspace)
 
 # turn smoky dataframe into SpatialPointsDataFrame by adding coordinates
 load("./data/smoky.rda")
-coordinates(smoky) <- c("easting", "northing")
+smoky_sf <- sf::st_as_sf(smoky, coords = c("easting", "northing"))
+# coordinates(smoky) <- c("easting", "northing")
 
 # read polygon of data
-poly = rgdal::readOGR("./data/smoky/smokypoly.shp")
-proj4string(poly)
-proj4string(smoky) #coordinate reference systems don't match!
-proj4string(poly) = CRS(proj4string(smoky))
+poly = sf::st_read("./data/smoky/smokypoly.shp")
+# proj4string(poly)
+# proj4string(smoky) #coordinate reference systems don't match!
+# proj4string(poly) = CRS(proj4string(smoky))
 
 ### Fig 8.4 create bubble plot of smoky pH
 # place legend on right, change default colors with col.regions
-spplot(smoky, "ph", key.space = "right", cuts = 10,
-       col.regions = colorspace::terrain_hcl(11))
+plot(smoky_sf["ph"], pal = hcl.colors, nbreaks = 9, pch = 19)
 
 # create gstat object for further analysis
 # formula ph ~ 1 assumes a constant mean over the spatial domain
-gsmoky = gstat(id = "ph", formula = ph ~ 1, data = smoky)
+gsmoky = gstat(id = "ph", formula = ph ~ 1, data = smoky_sf)
 
 # create geodata object for geoR
 geosmoky = as.geodata(cbind(smoky$easting, smoky$northing, smoky$ph))
@@ -140,7 +139,6 @@ lfit3 = likfit(geosmoky, ini.cov.pars = c(.25, 30), nugget = 0.05, cov.model = "
 # fit matern variogram model.  kappa is the smoothness parameter.  we allow it to be estimated.
 lfit4 = likfit(geosmoky, ini.cov.pars = c(.25, 30), nugget = 0.05, cov.model = "matern", lik.method = "REML", kappa = 1, fix.kappa = FALSE)
 
-
 # compare AIC/BIC values.  Model 3 is best in terms of AIC
 # but we'll use model 2
 summary(lfit1)
@@ -166,9 +164,14 @@ v2 = vgm(0.2725, "Exp", 36.25, Err = 0.0325, anis = c(70, 16.93/36.25))
 
 ### Fig 8.14
 # create prediction grid
-grid = spsample(poly, n = 1600, type = "regular") # grid of points within polygon
-coordnames(grid) = c("easting", "northing") # coordinate names have to match original data
-gridded(grid) = TRUE # turn into grid for better plotting!
+grid_sf <- sf::st_make_grid(poly, n = c(40, 40))
+# restrict to polygon
+grid_sf <- grid_sf[sf::st_intersects(grid, poly, sparse = FALSE)]
+plot(grid_sf)
+
+# prediction grid data frame
+grid <- as.data.frame(sf::st_coordinates(grid_sf))[,1:2]
+names(grid) <- c("easting", "northing")
 
 # gstat objects with anisotropic variogram models for kriging
 ganiso1 = gstat(id = "ph", formula = ph ~ 1, data = smoky, model = v1)
