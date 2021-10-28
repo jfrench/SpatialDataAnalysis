@@ -104,7 +104,10 @@ hist(tango_mc1$gof.sim, xlim = range(c(tango_mc1$gof.sim, tango_mc1$gof)))
 abline(v = tango_mc1$gof)
 hist(tango_mc1$sa.sim, xlim = range(c(tango_mc1$sa.sim, tango_mc1$sa)))
 abline(v = tango_mc1$sa)
-plot(tango_mc7)
+# change some of the default plotting options
+plot(tango_mc7,
+     obs.list = list(pch = 19, col = "purple"),
+     sim.list = list(pch = ".", col = "grey"))
 plot(tango_mc10)
 plot(tango_mc15)
 plot(tango_mc20)
