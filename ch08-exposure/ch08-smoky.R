@@ -42,7 +42,7 @@ proj4string(poly) = CRS(proj4string(smoky))
 ### Fig 8.4 create bubble plot of smoky pH
 # place legend on right, change default colors with col.regions
 spplot(smoky, "ph", key.space = "right", cuts = 10,
-       col.regions = colorspace::terrain_hcl(11))
+       col.regions = hcl.colors(11))
 
 # create gstat object for further analysis
 # formula ph ~ 1 assumes a constant mean over the spatial domain
@@ -185,23 +185,23 @@ idp = idw(ph ~ 1, smoky, newdata = grid)
 
 # plot predictions from ok model
 spplot(ok, "ph.pred", colorkey = TRUE,
-       col.regions = colorspace::terrain_hcl(64), cuts = 63,
+       col.regions = hcl.colors(64), cuts = 63,
        main = "ok predictions")
 
 
 # plot kriging variance from ok model
 spplot(ok, "ph.var", colorkey = TRUE,
-       col.regions = colorspace::terrain_hcl(64), cuts = 63,
+       col.regions = hcl.colors(64), cuts = 63,
        main = "ok kriging variance")
 # plot predictions from fok model
 spplot(fok, "ph.pred", colorkey = TRUE,
-       col.regions = colorspace::terrain_hcl(64), cuts = 63, main = "filtered ok predictions")
+       col.regions = hcl.colors(64), cuts = 63, main = "filtered ok predictions")
 # plot kriging variance from fok model
 spplot(fok, "ph.var", colorkey = TRUE,
-       col.regions = colorspace::terrain_hcl(64), cuts = 63, main = "filtered ok kriging variance")
+       col.regions = hcl.colors(64), cuts = 63, main = "filtered ok kriging variance")
 # plot predictions from idw
 spplot(idp, "var1.pred", colorkey = TRUE,
-       col.regions = colorspace::terrain_hcl(64), cuts = 63, main = "idw predictions")
+       col.regions = hcl.colors(64), cuts = 63, main = "idw predictions")
 
 # using ggplot2 (perhaps not the most efficient way)
 library(sf)
@@ -214,14 +214,14 @@ library(ggplot2)
 # plot predictions
 ggplot() + # start ggplot
         geom_tile(aes(x = X, y = Y, fill = ph.pred), data = sfok2) + # create heat map
-        scale_fill_gradientn(colours = colorspace::terrain_hcl(64)) + # change color scale
+        scale_fill_gradientn(colours = hcl.colors(64)) + # change color scale
         coord_fixed() +  # change coordinate reference system
         geom_point(aes(x = easting, y = northing), data = coordsdf) # add observed points
 
 # plot kriging variance
 ggplot() + # start ggplot
         geom_tile(aes(x = X, y = Y, fill = ph.var), data = sfok2) + # create heat map
-        scale_fill_gradientn(colours = colorspace::terrain_hcl(64)) + # change color scale
+        scale_fill_gradientn(colours = hcl.colors(64)) + # change color scale
         coord_fixed() +  # change coordinate reference system
         geom_point(aes(x = easting, y = northing), data = coordsdf) # add observed points
 
@@ -239,10 +239,10 @@ range(iok$ph.pred) # negative probabilities!
 allp = c(iok$ph.pred, ifk$ph.pred)
 cut = seq(min(allp), 1, len = 63) # for consistent coloring of graphics
 iokplot = spplot(iok, "ph.pred", colorkey = TRUE,
-                 col.regions = colorspace::terrain_hcl(64), at = cut,
+                 col.regions = hcl.colors(64), at = cut,
                  main = "probability map of Pr(ph > 8) ordinary")
 ifkplot = spplot(ifk, "ph.pred", colorkey = TRUE,
-                 col.regions = colorspace::terrain_hcl(64), at = cut,
+                 col.regions = hcl.colors(64), at = cut,
                  main = "probability map of Pr(ph > 8) filtered")
 library(gridExtra)
 grid.arrange(iokplot, ifkplot, ncol = 2)
@@ -271,13 +271,13 @@ range_sim = range(data.frame(attr(ok_sim, "data"))) # get range of all condition
 cut = seq(min(range_sim), max(range_sim), len = 63) # for consistent coloring of graphics
 # construct plots with consistent coloring
 sim1plot = spplot(ok_sim, "sim1",
-                  col.regions = colorspace::terrain_hcl(64), at = cut,
+                  col.regions = hcl.colors(64), at = cut,
                   main = "heat map of 1st simulation")
 sim2plot = spplot(ok_sim, "sim2",
-                  col.regions = colorspace::terrain_hcl(64), at = cut,
+                  col.regions = hcl.colors(64), at = cut,
                   main = "heat map of 2nd simulation")
 sim3plot = spplot(ok_sim, "sim3",
-                  col.regions = colorspace::terrain_hcl(64), at = cut,
+                  col.regions = hcl.colors(64), at = cut,
                   main = "heat map of 3rd simulation")
 grid.arrange(sim1plot, sim2plot, sim3plot, ncol = 3)
 
