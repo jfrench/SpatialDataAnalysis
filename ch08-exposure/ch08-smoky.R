@@ -80,12 +80,16 @@ fitexp = fit.variogram(variog2, vgm(.25, "Exp", 30, .05),
 fitexp #c = 0.214, a = 22.55, c0 = 0.0138
 # plot variogram with estimated exponential model
 plot(variog2, fitexp, main = "WRSS exponential fit")
+# wrss of fit
+attr(fitexp, "SSErr")
 
-# same thing using geoR (numbers a little different because variogram a little different)
+# same thing using geoR (numbers a little different because variogram a
+# little different)
 fitexpb = variofit(variog2b, ini.cov.pars = c(.25, 30),
                    nugget = 0.05, cov.model = "exponential",
                    weights = "cressie")
 fitexpb
+fitexpb$value # wrss of fit
 plot(variog2b)
 lines(fitexpb)
 
@@ -95,10 +99,18 @@ fitsph = fit.variogram(variog2, vgm(.25, "Sph", 30, .05), fit.method = 2)
 fitsph #c = 0.17, a = 63.33, c0 = 0.05
 # plot variogram with estimated spherical model
 plot(variog2, fitsph, main = "WRSS spherical fit")
+# wrss of fit
+attr(fitsph, "SSErr")
+# the spherical model fits better since its WRSS = 15.9
+# vs 19.9 for the exponential model
 
 # same thing using geoR (numbers different because variograms a little different)
-fitsphb = variofit(variog2b, ini.cov.pars = c(.25, 30), nugget = 0.05, cov.model = "spherical", weights = "cressie")
+fitsphb = variofit(variog2b, ini.cov.pars = c(.25, 30), nugget = 0.05,
+                   cov.model = "spherical", weights = "cressie")
 fitsphb
+fitsphb$value # wrss of fit
+# the spherical model fits worse since its WRSS = 30.44
+# vs 30.06 for the exponential model
 plot(variog2b)
 lines(fitsphb)
 
