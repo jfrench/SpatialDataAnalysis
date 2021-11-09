@@ -31,7 +31,7 @@ library(colorspace)
 
 # turn smoky dataframe into SpatialPointsDataFrame by adding coordinates
 load("./data/smoky.rda")
-coordinates(smoky) <- c("easting", "northing")
+coordinates(smoky) <- c("longitude", "latitude")
 
 # read polygon of data
 poly = rgdal::readOGR("./data/smoky/smokypoly.shp")
@@ -49,7 +49,7 @@ spplot(smoky, "ph", key.space = "right", cuts = 10,
 gsmoky = gstat(id = "ph", formula = ph ~ 1, data = smoky)
 
 # create geodata object for geoR
-geosmoky = as.geodata(cbind(smoky$easting, smoky$northing, smoky$ph))
+geosmoky = as.geodata(cbind(smoky$longitude, smoky$latitude, smoky$ph))
 
 ### Fig 8.5
 # construct variogram up to distance of 90 with bin widths of 4.5
@@ -179,7 +179,7 @@ v2 = vgm(0.2725, "Exp", 36.25, Err = 0.0325, anis = c(70, 16.93/36.25))
 ### Fig 8.14
 # create prediction grid
 grid = spsample(poly, n = 1600, type = "regular") # grid of points within polygon
-coordnames(grid) = c("easting", "northing") # coordinate names have to match original data
+coordnames(grid) = c("longitude", "latitude") # coordinate names have to match original data
 gridded(grid) = TRUE # turn into grid for better plotting!
 
 # gstat objects with anisotropic variogram models for kriging
@@ -228,14 +228,14 @@ ggplot() + # start ggplot
         geom_tile(aes(x = X, y = Y, fill = ph.pred), data = sfok2) + # create heat map
         scale_fill_gradientn(colours = hcl.colors(64)) + # change color scale
         coord_fixed() +  # change coordinate reference system
-        geom_point(aes(x = easting, y = northing), data = coordsdf) # add observed points
+        geom_point(aes(x = longitude, y = latitude), data = coordsdf) # add observed points
 
 # plot kriging variance
 ggplot() + # start ggplot
         geom_tile(aes(x = X, y = Y, fill = ph.var), data = sfok2) + # create heat map
         scale_fill_gradientn(colours = hcl.colors(64)) + # change color scale
         coord_fixed() +  # change coordinate reference system
-        geom_point(aes(x = easting, y = northing), data = coordsdf) # add observed points
+        geom_point(aes(x = longitude, y = latitude), data = coordsdf) # add observed points
 
 #### Example of indicator kriging
 # indicator kriging for ph > 8
@@ -271,7 +271,7 @@ gridded(grid2) = TRUE
 ok_sim = predict(ganiso1, newdata = grid2, nsim = 100)
 spplot(ok_sim, "sim1")
 
-coordnames(grid2) = c("easting", "northing") # coordinate names have to match original data
+coordnames(grid2) = c("longitude", "latitude") # coordinate names have to match original data
 gridded(grid2) = TRUE # turn into grid for better plotting!
 ok_sim = predict(ganiso1, newdata = grid2, nsim = 100)
 # plot some of the surfaced.  Colors not on same scale
