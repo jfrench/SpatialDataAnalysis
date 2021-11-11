@@ -1,28 +1,29 @@
+library(rgdal) # read shapefile
 library(gstat) # for most of the work
 library(sp) # for plotting
 
-setwd("~/OneDrive - The University of Colorado Denver/Teaching/Math6384/Data")
-load("smoky.rda")
+load("./data/smoky.rda")
 
 # turn smoky dataframe into SpatialPointsDataFrame by adding coordinates
-coordinates(smoky) <- c("easting", "northing")
+coordinates(smoky) <- c("longitude", "latitude")
 
 ### create bubble plot of smoky pH
 # place legend on right, change default colors with col.regions
 spplot(smoky, "ph", key.space = "right", cuts = 10, col.regions = topo.colors(11))
 
-# create prediction grid
-library(maptools) # to read shape polygon
 # read polygon of data
-poly = readShapePoly("smoky/smokypoly.shp")
+poly = rgdal::readOGR("./data/smoky/smokypoly.shp")
+proj4string(poly)
+proj4string(smoky) #coordinate reference systems don't match!
+proj4string(poly) = CRS(proj4string(smoky))
 
 grid = spsample(poly, n = 1600, type = "regular") # grid of points within polygon
-coordnames(grid) = c("easting", "northing") # coordinate names have to match original data
+coordnames(grid) = c("longitude", "latitude") # coordinate names have to match original data
 gridded(grid) = TRUE # turn into grid for better plotting!
 
 # universal kriging in gstat
 # notice that formula includes predictor variables
-uksmoky = gstat(id = "ph", formula = ph ~ easting + northing, data = smoky)
+uksmoky = gstat(id = "ph", formula = ph ~ longitude + latitude, data = smoky)
 # create directional variogram for residuals to see if we have anisotropy
 variog4 = variogram(uksmoky, cutoff = 90, alpha = c(70, 115, 160, 205))
 plot(variog4) # no evidence of anisotropy
@@ -34,7 +35,7 @@ v # see estimates
 plot(variog, v) # fits well
 
 # add variogram model to uksmoky
-uksmoky = gstat(id = "ph", formula = ph ~ easting + northing, data = smoky, model = v)
+uksmoky = gstat(id = "ph", formula = ph ~ longitude + latitude, data = smoky, model = v)
 
 # make universal kriging predictions on grid
 uk = predict(uksmoky, grid)

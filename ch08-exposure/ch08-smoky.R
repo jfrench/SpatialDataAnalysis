@@ -140,25 +140,46 @@ variog3b = variog4(geosmoky, direction = c(25, 70, 115, 160)/180*pi, max.dist = 
 plot(variog3b)
 
 # fit REML model for anisotropy
-# psiA controls the anisotropy angle
+# psiA controls the anisotropy angle. This is the direction of amin.
 # psiR controls the ratio of the large a (amaj) to the smallest a (amin)
 # note that psiA must be converted from degrees to radians using the formula radians = degrees/180*pi
 # by default psiA and psiR are considered FIXED (not estimates)
 # in model 1, both are fixed, in model 2, the psiA is fixed, and in model 3, neither are fixed
-lfit0 = likfit(geosmoky, ini.cov.pars = c(.25, 30), nugget = 0.05, cov.model = "exponential", lik.method = "REML") # omnidirectional
-lfit1 = likfit(geosmoky, ini.cov.pars = c(.25, 30), nugget = 0.05, cov.model = "exponential", lik.method = "REML", psiA = 70/180*pi, psiR = 3)
-lfit2 = likfit(geosmoky, ini.cov.pars = c(.25, 30), nugget = 0.05, cov.model = "exponential", lik.method = "REML", psiA = 70/180*pi, psiR = 3, fix.psiR = FALSE)
-lfit3 = likfit(geosmoky, ini.cov.pars = c(.25, 30), nugget = 0.05, cov.model = "exponential", lik.method = "REML", psiA = 70/180*pi, psiR = 3, fix.psiR = FALSE, fix.psiA = FALSE)
-# fit matern variogram model.  kappa is the smoothness parameter.  we allow it to be estimated.
-lfit4 = likfit(geosmoky, ini.cov.pars = c(.25, 30), nugget = 0.05, cov.model = "matern", lik.method = "REML", kappa = 1, fix.kappa = FALSE)
 
+# estimate isotropic covariance model
+lfit0 = likfit(geosmoky, ini.cov.pars = c(.25, 30), nugget = 0.05,
+               cov.model = "exponential", lik.method = "REML") # omnidirectional
 
-# compare AIC/BIC values.  Model 3 is best in terms of AIC
-# but we'll use model 2
-summary(lfit1)
-summary(lfit2) # c = .188, amin = 10.82, c0= 0.0016, amaj/amin = 1.91, degrees = 70
-summary(lfit3)
-summary(lfit4)
+# estimate an anisotropic covariance model with fixed angle and ratio
+# 70 is the angle chosen in the book example
+# the /180*pi converts the angle to radians
+lfit1 = likfit(geosmoky, ini.cov.pars = c(.25, 30), nugget = 0.05,
+               cov.model = "exponential", lik.method = "REML",
+               psiA = 70/180*pi, psiR = 3)
+# estimate an anisotropic covariance model with fixed angle but also estimates
+# the ratio of amaj/amin (amax/amin). Use fix.psiR = FALSE.
+lfit2 = likfit(geosmoky, ini.cov.pars = c(.25, 30), nugget = 0.05,
+               cov.model = "exponential", lik.method = "REML",
+               psiA = 70/180*pi, psiR = 3, fix.psiR = FALSE)
+
+# estimate an anisotropic covariance model with both angle and ratio
+# being estimated. Note fix.psiR (ratio) = FALSE, and fix.psiA = FALSE.
+lfit3 = likfit(geosmoky, ini.cov.pars = c(.25, 30), nugget = 0.05,
+               cov.model = "exponential", lik.method = "REML",
+               psiA = 70/180*pi, psiR = 3, fix.psiR = FALSE, fix.psiA = FALSE)
+
+# estimate an isotropic matern covariance model with and estimating the
+# smoothness parameter (kappa). Note fix.kappa = FALSE.
+lfit4 = likfit(geosmoky, ini.cov.pars = c(.25, 30), nugget = 0.05,
+               cov.model = "matern", lik.method = "REML", kappa = 1,
+               fix.kappa = FALSE)
+
+# compare AIC/BIC values.  Model 3 is best in terms of AIC since it has the
+# smallest AIC, but we'll use model 2 because that's what the book uses
+summary(lfit1) # AIC = 60.92
+summary(lfit2) # AIC = 61.81, c = .188, amin = 10.82, c0= 0.0016, amaj/amin = 1.91, degrees = 70
+summary(lfit3) # AIC = 60.73
+summary(lfit4) # AIC = 63.42
 
 ### Fig 8.12
 # show fit of anisotropic model
