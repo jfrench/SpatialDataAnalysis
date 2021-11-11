@@ -67,3 +67,5 @@ paniso <- predict(smoky_geolmod_aniso, newdata = ppoints, return_type = "sf")
 # bubble plot
 plot(paniso, pal = hcl.colors)
 
+plot(st_rasterize(paniso), pal = hcl.colors)
+
