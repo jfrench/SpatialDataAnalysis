@@ -1,7 +1,6 @@
 # install.packages(c("gstat", "geoR", "fields", "maptools", "gridExtra"))
 library(sp)
 library(gstat) # for most of the work
-library(colorspace)
 
 data(meuse, package = "sp") #available in sp package
 # turn smoky dataframe into SpatialPointsDataFrame by adding coordinates
@@ -27,14 +26,14 @@ gmeuse = gstat(id = "lead", formula = log(lead) ~ 1,
 data(meuse.grid) # prediction grid built into gstat
 coordinates(meuse.grid) = ~ x + y
 gridded(meuse.grid) = TRUE
-
+# predict response
 oklog = predict(gmeuse, newdata = meuse.grid)
 spplot(oklog, "lead.pred")
 
 # biased prediction, just take exp of predicted values
 epred = exp(oklog$lead.pred)
 oklog$lead.pred = epred
-spplot(oklog, "lead.pred", col.regions = terrain_hcl(64),
+spplot(oklog, "lead.pred", col.regions = hcl.colors(64),
        cuts = 63)
 
 # lognormal prediction
@@ -42,16 +41,16 @@ spplot(oklog, "lead.pred", col.regions = terrain_hcl(64),
 olk = krigeTg(lead ~ 1, locations = meuse, newdata = meuse.grid,
               model = f, lambda = 0)
 names(olk) # we want the trans-gaussian kriging predictions
-spplot(olk, "var1TG.pred", col.regions = terrain_hcl(64),
+spplot(olk, "var1TG.pred", col.regions = hcl.colors(64),
        cuts = 63)
 
 # compare prediction maps on original scale (make sure colors on same scale)
 cut = seq(0, 600, len = 63) # for consistent coloring of graphics
 expplot = spplot(oklog, "lead.pred", colorkey = TRUE,
-                 col.regions = terrain_hcl(64), at = cut,
+                 col.regions = hcl.colors(64), at = cut,
                  main = "biased predictions of lead")
 olkplot = spplot(olk, "var1TG.pred", colorkey = TRUE,
-                 col.regions = terrain_hcl(64), at = cut,
+                 col.regions = hcl.colors(64), at = cut,
                  main = "lognormal predictions of lead")
 # see biasedness more clearly
 head(cbind(oklog$lead.pred, olk$var1TG.pred))
