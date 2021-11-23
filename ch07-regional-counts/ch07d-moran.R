@@ -97,7 +97,7 @@ i_cr = function(y, rni, w) {
 # # p-value
 # (sum(tsimc >= t0c) + 1)/(nsim + 1)
 # new version of constant risk moran's I (Walter 1992)
-morancr.test(y, pop = n, w = w)
+smerc::morancr.test(y, pop = n, w = w)
 
 #### summary of results
 ### Counts
