@@ -44,6 +44,7 @@ gsmoky = gstat(id = "ph", formula = ph ~ 1, data = smoky)
 # C0 = 0.0325, the a chould be amaj, and the ratio in anis should be amin/amaj
 # v1 is the variogram model for standard kriging
 # v2 is the variogram model for filtered kriging
+# Err means the nugget is measurement error, indicating we want filtered kriging
 v1 = vgm(0.2725, "Exp", 36.25, nugget = 0.0325, anis = c(70, 16.93/36.25))
 v2 = vgm(0.2725, "Exp", 36.25, Err = 0.0325, anis = c(70, 16.93/36.25))
 
@@ -71,17 +72,18 @@ spplot(ok, "ph.pred", colorkey = TRUE,
        col.regions = hcl.colors(64), cuts = 63,
        main = "ok predictions")
 
-
 # plot kriging variance from ok model
 spplot(ok, "ph.var", colorkey = TRUE,
        col.regions = hcl.colors(64), cuts = 63,
        main = "ok kriging variance")
 # plot predictions from fok model
 spplot(fok, "ph.pred", colorkey = TRUE,
-       col.regions = hcl.colors(64), cuts = 63, main = "filtered ok predictions")
+       col.regions = hcl.colors(64), cuts = 63,
+       main = "filtered ok predictions")
 # plot kriging variance from fok model
 spplot(fok, "ph.var", colorkey = TRUE,
-       col.regions = hcl.colors(64), cuts = 63, main = "filtered ok kriging variance")
+       col.regions = hcl.colors(64), cuts = 63,
+       main = "filtered ok kriging variance")
 # plot predictions from idw
 spplot(idp, "var1.pred", colorkey = TRUE,
        col.regions = hcl.colors(64), cuts = 63, main = "idw predictions")
@@ -100,6 +102,9 @@ ggplot() + # start ggplot
         scale_fill_viridis_c() +
         coord_fixed() +  # change coordinate reference system
         geom_point(aes(x = longitude, y = latitude), data = coordsdf) # add observed points
+
+# non tile version
+ggplot(sfok) + geom_sf(aes(col = ph.pred)) + scale_color_viridis_c()
 
 # plot kriging variance
 ggplot() + # start ggplot
@@ -140,11 +145,11 @@ spplot(ok_sim, "sim1", col.regions = hcl.colors(11), cuts = 10)
 
 gridded(grid2) = TRUE
 ok_sim = predict(ganiso1, newdata = grid2, nsim = 100)
-spplot(ok_sim, "sim1", col.regions = hcl.colors(11))
+spplot(ok_sim, "sim1", col.regions = hcl.colors(11), cuts = 10)
 
-coordnames(grid2) = c("longitude", "latitude") # coordinate names have to match original data
-gridded(grid2) = TRUE # turn into grid for better plotting!
-ok_sim = predict(ganiso1, newdata = grid2, nsim = 100)
+# coordnames(grid2) = c("longitude", "latitude") # coordinate names have to match original data
+# gridded(grid2) = TRUE # turn into grid for better plotting!
+# ok_sim = predict(ganiso1, newdata = grid2, nsim = 100)
 # plot some of the surfaced.  Colors not on same scale
 spplot(ok_sim, "sim1", col.regions = hcl.colors(11), cuts = 10)
 spplot(ok_sim, "sim2", col.regions = hcl.colors(11), cuts = 10)

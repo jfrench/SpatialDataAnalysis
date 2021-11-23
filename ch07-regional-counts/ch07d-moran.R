@@ -89,12 +89,15 @@ i_cr = function(y, rni, w) {
   return(sum(w * y_std %*% t(y_std))/sum(w))
 }
 
-tsimc = numeric(nsim)
-t0c = i_cr(y, rni, w) # observed statistic
-# statistics for data simualted under CRH
-for (i in 1:nsim) tsimc[i] = i_cr(rpois(N, rni), rni = rni, w = w)
-# p-value
-(sum(tsimc >= t0c) + 1)/(nsim + 1)
+# old, manual implementation
+# tsimc = numeric(nsim)
+# t0c = i_cr(y, rni, w) # observed statistic
+# # statistics for data simualted under CRH
+# for (i in 1:nsim) tsimc[i] = i_cr(rpois(N, rni), rni = rni, w = w)
+# # p-value
+# (sum(tsimc >= t0c) + 1)/(nsim + 1)
+# new version of constant risk moran's I (Walter 1992)
+morancr.test(y, pop = n, w = w)
 
 #### summary of results
 ### Counts
