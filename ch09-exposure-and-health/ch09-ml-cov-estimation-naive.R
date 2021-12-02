@@ -1,5 +1,4 @@
-library(mvtnorm) # for rmvnorm
-library(gear) # for evgram
+library(mvtnorm) # for rmvnorm, dmvnorm
 
 ### covariance parameter estimation for non-stationary mean
 
@@ -26,13 +25,13 @@ S = cov.exp(d, psill = 1, range = 0.5, nugget = 0.1)
 # generate observed data
 y = c(rmvnorm(n = 1, mean = X %*% beta, sigma = S))
 
-# negative concentrated multivariate normal log-likelihood
-# theta = c(psill, range, nugget), the covariance parameter
-# vector.  needs to be a vector for nlminb function
+# Negative concentrated multivariate normal log-likelihood (only beta profiled)
+# theta = c(psill, a, c0), the covariance parameter vector.
+# Needs to be a vector for nlminb function
 conc.ll = function(theta) {
   psill = theta[1]
-  range = theta[2]
-  nugget = theta[3]
+  a = theta[2]
+  c0 = theta[3]
 
   # covariance matrix based on given parameters
   Shat = cov.exp(d, psill, range, nugget)
@@ -48,9 +47,6 @@ conc.ll = function(theta) {
 # construct empirical semivariogram using gear package to
 # find reasonable starting values for covariance parameters
 df = data.frame(y, x1 = coords[,1], x2 = coords[,2])
-# detrend data before estimating semivariogram
-ev = evgram(y ~ x1, data = df, coordnames = ~ x1 + x2)
-plot(ev, ylim = c(0, 0.7))
 
 # start is the starting parameter estimates
 # objective is the function to minimize
@@ -66,5 +62,10 @@ nlminb(start = c(0.4, 0.4, 0.1),
 # [1] 0.45118 0.24754 0.00000
 # these are the maximum likelihood estimates of:
 # partial sill, range parameter, and nugget
+# covariance matrix based on given parameters
+Shat = cov.exp(d, 0.45118, 0.24754, 0)
+# estimate of beta (GLS)
+(betatilde = solve(crossprod(X, solve(Shat, X)), crossprod(X, solve(Shat, y))))
+
 
 
