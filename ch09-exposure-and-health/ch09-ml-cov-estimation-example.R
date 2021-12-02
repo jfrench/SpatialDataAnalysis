@@ -1,5 +1,5 @@
-library(mvtnorm)
-library(gear)
+library(mvtnorm) # for rmvnorm
+library(gear) # for evgram
 
 ### covariance parameter estimation for non-stationary mean
 
@@ -16,8 +16,7 @@ X = cbind(1, coords[,1])
 beta = c(1, 2)
 
 # construct exponential covariance function
-# note: this will not work for filtered kriging settings or
-# when the data locations aren't unique
+# note: this function is incorrect if the coordinates are not unique
 cov.exp = function(d, psill, range, nugget) {
   psill * exp(-d/range) + nugget * diag(nrow(d))
 }
@@ -50,7 +49,7 @@ conc.ll = function(theta) {
 # find reasonable starting values for covariance parameters
 df = data.frame(y, x1 = coords[,1], x2 = coords[,2])
 # detrend data before estimating semivariogram
-ev = vgram(y ~ x1, data = df, coords = ~ x1 + x2)
+ev = evgram(y ~ x1, data = df, coordnames = ~ x1 + x2)
 plot(ev, ylim = c(0, 0.7))
 
 # start is the starting parameter estimates
