@@ -34,7 +34,7 @@ conc.ll = function(theta) {
   c0 = theta[3]
 
   # covariance matrix based on given parameters
-  Shat = cov.exp(d, psill, range, nugget)
+  Shat = cov.exp(d, psill, a, c0)
   # estimate of beta (GLS)
   betahat = solve(crossprod(X, solve(Shat, X)),
                   crossprod(X, solve(Shat, y)))

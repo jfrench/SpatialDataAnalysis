@@ -221,7 +221,6 @@ spplot(ok, "ph.pred", colorkey = TRUE,
        col.regions = hcl.colors(64), cuts = 63,
        main = "ok predictions")
 
-
 # plot kriging variance from ok model
 spplot(ok, "ph.var", colorkey = TRUE,
        col.regions = hcl.colors(64), cuts = 63,

@@ -41,9 +41,9 @@ uksmoky = gstat(id = "ph", formula = ph ~ longitude + latitude, data = smoky, mo
 uk = predict(uksmoky, grid)
 
 # plot prediction from uk
-spplot(uk, "ph.pred", colorkey = TRUE, col.regions = fields::tim.colors(64), cuts = 63, main = "uk predictions")
+spplot(uk, "ph.pred", colorkey = TRUE, col.regions = hcl.colors(64), cuts = 63, main = "uk predictions")
 # plot kriging variance from uk
-spplot(uk, "ph.var", colorkey = TRUE, col.regions = fields::tim.colors(64), cuts = 63)
+spplot(uk, "ph.var", colorkey = TRUE, col.regions = hcl.colors(64), cuts = 63)
 
 # evaluate covariance matrix for observed data
 # determine distances
@@ -72,9 +72,9 @@ head(cbind(rhat, uk$ph.pred))
 # plot ordinary and universal kriging variances on one plot
 cut = seq(0, max(uk$ph.var), len = 63) # for consistent coloring of graphics
 # construct plots with consistent coloring
-okvar = spplot(rok, "r.var", col.regions = colorspace::terrain_hcl(64),
+okvar = spplot(rok, "r.var", col.regions = hcl.colors(64),
                at = cut, main = "ordinary kriging variance")
-ukvar = spplot(uk, "ph.var", col.regions = colorspace::terrain_hcl(64),
+ukvar = spplot(uk, "ph.var", col.regions = hcl.colors(64),
                at = cut, main = "universal kriging variance")
 library(gridExtra)
 grid.arrange(okvar, ukvar, ncol = 2)
@@ -82,4 +82,20 @@ grid.arrange(okvar, ukvar, ncol = 2)
 head(cbind(rok$r.var, uk$ph.var))
 # determine proportions of kriging variances that are
 # smaller for ok than uk
-sum(rok$r.var <= uk$ph.var)/length(rok$r.var)
+mean(rok$r.var <= uk$ph.var)
+
+# how to do this in one plot
+combine_var = cbind(rok, uk)
+spplot(combine_var, c("r.var", "ph.var"), col.regions = hcl.colors(64),
+       cuts = 63, main = c("ok var", "uk var"))
+
+# create_difference of universal kriging variance - ordinary kriging variance
+combine_var$var_diff <- combine_var$ph.var - combine_var$r.var
+
+diffplot = spplot(combine_var, "var_diff", col.regions = hcl.colors(64),
+               cuts = 63, main = "diff of uk.var - ok.var")
+ukvar = spplot(uk, "ph.var", col.regions = hcl.colors(64),
+               cuts = 63, main = "universal kriging variance")
+grid.arrange(ukvar, diffplot, ncol = 2)
+
+
