@@ -1,4 +1,4 @@
-# install.packages(c("spdep", "rgdal", "RColorBrewer", "colorRamps"))
+# install.packages(c("spdep", "sf", "spatialreg", "ggplot2", "patchwork"))
 library(spdep)
 library(sf)
 library(spatialreg)
@@ -6,9 +6,16 @@ library(ggplot2)
 library(patchwork)
 
 # read in data
-# setwd("~/.data/NY_data")
+# data related to leukeumia cases in 8 counties in upstate New York
+# POP8 is the county population
+# PEXPOSURE: log(100 * inverse distance between each census tract centroid and the nearest
+#            inactive hazardous waste site containing TCE)
+# PCTAGE65P: percentage of the population older than 65
+# PCTOWNHOME: percentage of the population that owns their home
+# Z: log(1000(Y_i + 1)/n_i), where Y_i is the number of leukeumia cases and n_i is the
+# population size fo the counties.
 NY8 <- sf::st_read("./data/NY_data/NY8_utm18.shp")
-TCE <- sf::st_read("./data/NY_data/TCE.shp")
+TCE <- sf::st_read("./data/NY_data/TCE.shp") # locations of chemical plants
 NY_nb <- spdep::read.gal("./data/NY_data/NY_nb.gal", region.id = row.names(NY8),
                          override.id = TRUE)
 cities <- sf::st_read("./data/NY_data/NY8cities.shp")
