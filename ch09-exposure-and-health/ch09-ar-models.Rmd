@@ -1,3 +1,13 @@
+---
+title: "AR analysis of New York leukemia cases"]
+subtitle: "Data Break: Census tract analysis for 8 counties in upstate New York"]
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
 # install.packages(c("spdep", "sf", "spatialreg", "ggplot2", "patchwork"))
 library(spdep)
 library(sf)
@@ -6,16 +16,9 @@ library(ggplot2)
 library(patchwork)
 
 # read in data
-# data related to leukeumia cases in 8 counties in upstate New York
-# POP8 is the county population
-# PEXPOSURE: log(100 * inverse distance between each census tract centroid and the nearest
-#            inactive hazardous waste site containing TCE)
-# PCTAGE65P: percentage of the population older than 65
-# PCTOWNHOME: percentage of the population that owns their home
-# Z: log(1000(Y_i + 1)/n_i), where Y_i is the number of leukeumia cases and n_i is the
-# population size for the counties.
-NY8 <- sf::st_read("./data/NY_data/NY8_utm18.shp")
-TCE <- sf::st_read("./data/NY_data/TCE.shp") # locations of inactive hazardous waste sites storing TCE
+# setwd("~/.data/NY_data")
+NY8 <- sf::st_read("./data/NY_data/NY8_utm18.shp") # data related to leukeum
+TCE <- sf::st_read("./data/NY_data/TCE.shp") # locations of chemical plants
 NY_nb <- spdep::read.gal("./data/NY_data/NY_nb.gal", region.id = row.names(NY8),
                          override.id = TRUE)
 cities <- sf::st_read("./data/NY_data/NY8cities.shp")
@@ -72,10 +75,8 @@ b <- ggplot(NY8) + geom_sf(aes(fill = sar_stochastic)) +
 # use patchwork to plot a and b side-by-side
 a + b
 
-# changes weights from ls regression.
-# Residual Weights are proportional to population sizes in each region.
-# The variance associated with each observation is inversely proportional
-# to the population
+# changes weights from ls regression.  Weights are inversely proportional
+# to population sizes in each region.
 nylmw <- lm(Z ~ PEXPOSURE + PCTAGE65P + PCTOWNHOME, data = NY8,
             weights = POP8)
 summary(nylmw)
@@ -117,8 +118,6 @@ b3 <- ggplot(NY8) + geom_sf(aes(fill = sarw_stochastic)) +
 # use patchwork to plot a and b side-by-side
 a3 + b3
 # residual autocorrelation vanishes
-
-b + b3
 
 # fit one-parameter car model
 nycar <- spatialreg::spautolm(Z ~ PEXPOSURE + PCTAGE65P + PCTOWNHOME,

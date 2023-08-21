@@ -1,8 +1,7 @@
 library(spatstat) # for inference on spatial point processes
 # source("http://math.ucdenver.edu/~jfrench/data/ss.R") # for custom helper functions
 
-setwd("~/OneDrive - The University of Colorado Denver/teaching/math6384/sda_code/data")
-grave = read.csv("grave.csv", header = TRUE)
+grave = read.csv("./data/grave.csv", header = TRUE)
 grave$deformity = factor(grave$deformity)
 levels(grave$deformity) = c("unaffected", "affected")
 # which event locations are affected/unaffected
@@ -43,16 +42,16 @@ set.seed(1)
 # ... is additional arguments passed to Lest
 lplot <- function(x, nsim = 500, level = 0.95,
                   correction = "Ripley", ...) {
-  lobs <- spatstat.core::Lest(x, correction = correction, ...)
+  lobs <- spatstat.explore::Lest(x, correction = correction, ...)
 
   # lambda <- summary(x)$intensity
   win <- x$window
   lsim <- pbapply::pblapply(1:nsim, FUN = function(i) {
     # xsim <- spatstat::rpoispp(lambda, win = win)
     # generate n event locations over study area under CSR
-    xsim <- spatstat.core::runifpoint(n = x$n, win = win)
+    xsim <- spatstat.random::runifpoint(n = x$n, win = win)
     # estimate L for simulated point pattern
-    spatstat.core::Lest(xsim, correction = correction, ...)
+    spatstat.explore::Lest(xsim, correction = correction, ...)
   })
 
   r <- lobs$r # get distances
@@ -116,7 +115,7 @@ title("L plot for nonaffected grave sites, polygon")
 
 # estimate L - r for observed
 # use Ripley's correction
-laf = spatstat.core::Lest(pppol[,af], r = r, correction = "Ripley")$iso - r # Lhat for affected
+laf = spatstat.explore::Lest(pppol[,af], r = r, correction = "Ripley")$iso - r # Lhat for affected
 
 # get n and naf for simulations
 n <- pppol$n
@@ -128,7 +127,7 @@ naf <- length(af)
 # each column is a simulation
 lrl <- pbapply::pbsapply(1:499, FUN = function(i) {
   xsim <-
-  spatstat.core::Lest(pppol[,sample.int(n, size = naf)],
+  spatstat.explore::Lest(pppol[,sample.int(n, size = naf)],
        r = r, correction = "Ripley")$iso - r
 })
 
@@ -157,18 +156,19 @@ legend("topleft",
 
 # test hypothesis that affected event locations are
 # clustered at any scale for 0 <= h <= 2000
-# in rectangular domain
+# in polygon domain
 r <- seq(0, 2000, len = 201)
-Tobs <- max(spatstat.core::Lest(pppafpol, r = r, correction = "Ripley")$iso - r)
+Tobs <- max(spatstat.explore::Lest(pppafpol, r = r, correction = "Ripley")$iso - r)
 # relabel affected events,
 # then compute max(Lhat(h) - h)
 # for relabeled data
 Tsim <- pbapply::pbsapply(1:499, FUN = function(i) {
-  max(spatstat.core::Lest(pppol[sample.int(n, size = naf), 2:3], r = r,
+  max(spatstat.explore::Lest(pppol[sample.int(n, size = naf), 2:3], r = r,
            correction = "Ripley")$iso - r)
 })
 
 # proportion of simulated test statistics
 # as extreme as one observed
-# the observed pattern is relative consistent with a random labeling of affected
+# the observed pattern is relative consistent with a random
+# labeling of affected
 mean(c(Tsim, Tobs) >= Tobs)

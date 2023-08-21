@@ -1,8 +1,7 @@
 library(spatstat) # for inference on spatial point processes
 
 # import and clean data
-setwd("./data/")
-grave <- read.csv("grave.csv", header = TRUE)
+grave <- read.csv("./data/grave.csv", header = TRUE)
 grave$deformity <-  factor(grave$deformity)
 levels(grave$deformity) <-  c("unaffected", "affected")
 
