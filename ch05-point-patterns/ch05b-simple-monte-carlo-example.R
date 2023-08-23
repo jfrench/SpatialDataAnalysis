@@ -1,14 +1,20 @@
 # N = 10
 # test statistic is (sample mean - 0)/(sd(data)/sqrt(N))
 
-Tobs = 4 
+set.seed(1)
+
+Tobs = 4
+N = 10 # sample size
+nsim = 999 # number of simulated data sets
+
 # Under H0, say the distribution of the data is N(0, 1)
 # Simulate data sets under H0
-simdata = matrix(rnorm(10 * 999, mean = 0, sd = 1), nrow = 999, ncol = 10)
+simdata = matrix(rnorm(N * nsim, mean = 0, sd = 1),
+                 nrow = nsim, ncol = N)
 # calculate test statistic for each simulated data set
-Tsim = rowMeans(simdata)/(apply(simdata, 1, sd)/sqrt(10))
+Tsim = rowMeans(simdata)/(apply(simdata, 1, sd)/sqrt(N))
 # include observed test statistic to simulated test statistics
 Tsim = c(Tsim, Tobs)
 # determine proportion of test statistics as extreme as the observed
-# test statistc
+# test statistic
 mean(Tsim >= Tobs)
