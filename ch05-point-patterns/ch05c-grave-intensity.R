@@ -43,16 +43,25 @@ bvun <-  sd(grave[un,3])*length(un)^(-1/(dim+4))
 iaf <-  density(pprec[af,], sigma = c(buaf, bvaf))
 iun <-  density(pprec[un,], sigma = c(buun, bvun))
 
-# plot perspective and contour plots of estimated intensity for affected sites
+# plot perspective and contour plots of estimated intensity
+# for affected sites
 par(mfrow = c(1, 2))
-persp(iaf, theta = 45, phi = 35, xlab = "u", ylab = "v", zlab = "density", main = "Estimated intensity function")
-contour(iaf, xlab = "u", ylab = "v", main = "Affected grave locations")
+persp(iaf, theta = 45, phi = 35,
+      xlab = "u", ylab = "v",
+      zlab = "density",
+      main = "Estimated intensity function")
+contour(iaf, xlab = "u", ylab = "v",
+        main = "Affected grave locations")
 points(grave[af,2:3], pch = ".")
 
 # plot perspective and contour plots of estimated intensity for unaffected sites
 par(mfrow = c(1, 2))
-persp(iun, theta = 45, phi = 35, xlab = "u", ylab = "v", zlab = "density", main = "Estimated intensity function")
-contour(iun, xlab = "u", ylab = "v", main = "Unaffected grave locations")
+persp(iun, theta = 45, phi = 35,
+      xlab = "u", ylab = "v",
+      zlab = "density",
+      main = "Estimated intensity function")
+contour(iun, xlab = "u", ylab = "v",
+        main = "Unaffected grave locations")
 points(grave[un, 2:3], pch = ".")
 
 # plot perspective and contour plots of estimated intensity for affected/unaffected sites jointly
@@ -82,11 +91,13 @@ i_function <- function(uv) {
   # kernel in v direction
   vstar <- (v - af_coords$v)/bvaf
   kv <- dnorm(vstar)/bvaf # evaluate kernel, correct by bandwidth
-  # sum multiplied kernel values (divide by sample size to estimate density)
+  # sum multiplied kernel values
+  # (divide by sample size to estimate density)
   sum(ku * kv)/length(af_coords$u)
 }
 
-# evaluate intensity at each location (not accounting for size of spatial unit)
+# evaluate intensity at each location
+# (not accounting for size of spatial unit)
 k <- apply(grid, MARGIN = 1, FUN = i_function)
 # convert to matrix
 kmat <- matrix(k, nrow = length(ug), ncol = length(vg))
