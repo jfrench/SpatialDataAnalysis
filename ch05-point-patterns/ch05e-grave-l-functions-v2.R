@@ -100,29 +100,6 @@ lrl <- pbapply::pbsapply(1:499, FUN = function(i) {
        r = r, correction = "Ripley")$iso - r
 })
 
-# apply the min function to each row  (MARGIN = 1) of lrl
-lo <- apply(lrl, MARGIN = 1, FUN = min, na.rm = TRUE)
-hi <- apply(lrl, MARGIN = 1, FUN = max, na.rm = TRUE)
-qlo <- apply(lrl, MARGIN = 1, FUN = quantile,
-             prob = 0.025, na.rm = TRUE)
-qhi <- apply(lrl, MARGIN = 1, FUN = quantile,
-             prob = 0.975, na.rm = TRUE)
-med <- apply(lrl, MARGIN = 1, FUN = median, na.rm = TRUE)
-# construct empty plot of the right size
-plot(c(0, 5000), c(-600, 800), type = "n",
-     xlab = "distance", ylab = "L(distance) - distance")
-lines(r, laf, lwd = 2)
-lines(r, lo, lty = 2)
-lines(r, hi, lty = 2)
-lines(r, qlo, lty = 1)
-lines(r, qhi, lty = 1)
-lines(r, med, lty = 4)
-legend("topleft",
-       legend = c("min/max",
-                  "2.5th, 97.5th percentiles",
-                  "median"),
-       lty = c(2, 1, 4))
-
 # test hypothesis that affected event locations are
 # clustered at any scale for 0 <= h <= 2000
 # in polygon domain
