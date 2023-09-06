@@ -79,27 +79,6 @@ title("L plot for affected grave sites, polygon")
 lplot(pppunpol, r = r)
 title("L plot for nonaffected grave sites, polygon")
 
-# Are the affected graves more clustered than expected
-# if the grave sites were randomly labeled?
-
-# estimate L - r for observed
-# use Ripley's correction
-laf = spatstat.explore::Lest(pppol[,af], r = r, correction = "Ripley")$iso - r # Lhat for affected
-
-# get n and naf for simulations
-n <- pppol$n
-naf <- length(af)
-
-# 499 times, randomly label affected locations and compute
-# L - r for affected sites
-# pbsapply returns this in a nice format and includes a timer
-# each column is a simulation
-lrl <- pbapply::pbsapply(1:499, FUN = function(i) {
-  xsim <-
-  spatstat.explore::Lest(pppol[,sample.int(n, size = naf)],
-       r = r, correction = "Ripley")$iso - r
-})
-
 # test hypothesis that affected event locations are
 # clustered at any scale for 0 <= h <= 2000
 # in polygon domain
