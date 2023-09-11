@@ -44,12 +44,11 @@ lplot <- function(x, nsim = 500, level = 0.95,
                   correction = "Ripley", ...) {
   lobs <- spatstat.explore::Lest(x, correction = correction, ...)
 
-  # lambda <- summary(x)$intensity
+  lambda <- summary(x)$intensity
   win <- x$window
   lsim <- pbapply::pblapply(1:nsim, FUN = function(i) {
-    # xsim <- spatstat::rpoispp(lambda, win = win)
-    # generate n event locations over study area under CSR
-    xsim <- spatstat.random::runifpoint(n = x$n, win = win)
+    # generate CSR process based on observed data
+    xsim <- spatstat.random::rpoispp(lambda, win = win)
     # estimate L for simulated point pattern
     spatstat.explore::Lest(xsim, correction = correction, ...)
   })
