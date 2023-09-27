@@ -19,7 +19,7 @@ simdist = "multinomial"
 # taken from internals of cepp.test
 
 # compute intercentroid distance
-d = sp::spDists(coords, longlat = longlat)
+d = smerc::gedist(coords, longlat = longlat)
 # determine the number of nearest neighbors to get nstar persons at risk
 nn = casewin(d, pop, nstar)
 # e.g., starting at region 1, you need to include regions 1, 2, and 15 to get
