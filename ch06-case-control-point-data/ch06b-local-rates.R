@@ -16,9 +16,15 @@ plot(scan, chars = c(1, 20),
 # extract most likely and other significant clusters
 clusters(scan)
 
+# run a parallelized version of spscan.test
+
+# setup workers for parallelization
+# use 2 workers
+cl <- parallel::makeCluster(getOption("cl.cores", 2))
+
 # if there were more than 1 cluster ....
 scan2 = spscan.test(grave, nsim = 999, case = "affected",
-                    alpha = 0.8)
+                    alpha = 0.8, cl = cl)
 summary(scan2)
 plot(scan2, chars = c(1, 20),
      main = "detected clusters for grave data",
