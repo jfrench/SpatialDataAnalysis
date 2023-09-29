@@ -37,19 +37,6 @@ summary(scan)
 # cluster information
 clusters(scan)
 
-# library(RColorBrewer) # useful for determining plotting colors
-# # look at qualtitative color mapping that is colorblind friendly
-# display.brewer.all(type = "qual", colorblindFriendly = TRUE)
-# mycol = brewer.pal(3, "Dark2")
-# # create vector of colors to show results
-# # default is white (no clustering)
-# nycol = rep("white", nrow(nydf))
-# # the most likely cluster locations are lightblue
-# nycol[scan$clusters[[1]]$locids] = mycol[1]
-# # the secondary cluster locations are lightorange and lightpurple
-# nycol[scan$clusters[[2]]$locids] = mycol[2]
-# nycol[scan$clusters[[3]]$locids] = mycol[3]
-
 # need to color 3 clusters
 mycol = grDevices::hcl.colors(3)
 # color.clusters(scan, col = mycol) colors the 3 clusters using the desired clusters
