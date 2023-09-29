@@ -41,4 +41,10 @@ csim = cepp.sim(nsim = nsim, nn = nn, ty = sum(cases), ex = ex,
 pvalue = mc.pvalue(cstar, csim)
 
 # most likely cluster
-which.min(pvalue)
+which.max(cstar)
+
+# rank clusters by largest test statistic
+order(cstar, decreasing = TRUE)
+
+# view statistics of each window by ranking
+cstar[order(cstar, decreasing = TRUE)]
