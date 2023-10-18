@@ -15,6 +15,9 @@ plot(st_geometry(ny8), border="grey60")
 plot(ny_nb, coords = st_centroid(st_geometry(ny8)),
      add=TRUE, col="blue", pch = 19, cex = 0.6)
 
+# plot choropleth map of case counts
+plot(ny8["Cases"], pal = hcl.colors)
+
 # read in data
 nydf = read.table("./data/NYtract.dat")
 names(nydf) = c("x", "y", "Population", "Observed")

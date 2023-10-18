@@ -21,8 +21,6 @@ ex <- sum(cases)/sum(pop) * pop
 d <- gedist(coords)
 # compute case windows
 cwins <- casewin(d, cases, cstar)
-# determine number of retions in each case window
-l <- sapply(cwins, length)
 # determine number of cases in each case window
 case_cwins <- zones.sum(cwins, cases)
 # determined expected number of cases in each case window
@@ -39,7 +37,7 @@ if (!modified) {
 }
 
 # determine most significant non-overlapping clusters
-pruned <- sig_noc(tobs = l, zones = cwins, pvalue = pvalue,
+pruned <- sig_noc(tobs = case_cwins, zones = cwins, pvalue = pvalue,
                   alpha = alpha, order_by = "pvalue")
 
 pruned
