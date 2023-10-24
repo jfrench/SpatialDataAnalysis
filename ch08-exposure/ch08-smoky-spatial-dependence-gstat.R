@@ -1,41 +1,22 @@
-# install.packages(c("gstat", "geoR", "rgdal", "sp", "gridExtra", "sf", "colorspace"))
+# install.packages(c("gstat", "geoR", "sf"))
 library(gstat) # for most of the work
-library(sp)
-library(rgdal)
+library(sf)
 
 ### some notes
-# a dataframe (df) can be turned into a SpatialPointsDataFrame
-# using the command coordinates(df) <- c("x", "y") where
-# x and y are the names of the x and y coordinate in df.
-
-# the spplot function takes a SpatialPointsDataFrame or a
-# the variogram function requires a gstat object, which
-# can be created using the gstat function
-
-# the predict function (to perform kriging) takes
-# a gstat object that includes a variogram model
-
 # the variogram functions for the gstat package parameterize
 # the direction in degrees.  the variogram functions for the
 # geoR package function the variogram functions in radians,
 # where radians = degrees/180*pi
 
-# projections for data and prediction locations must match
-
-# turn smoky dataframe into SpatialPointsDataFrame by adding coordinates
+# turn smoky into sf dataframe
 load("./data/smoky.rda")
-coordinates(smoky) <- c("longitude", "latitude")
-
-# read polygon of data
-poly = rgdal::readOGR("./data/smoky/smokypoly.shp")
-proj4string(poly)
-proj4string(smoky) #coordinate reference systems don't match!
-proj4string(poly) = CRS(proj4string(smoky))
+smoky <- sf::st_as_sf(smoky,
+                      coords = c("longitude", "latitude"))
 
 ### Fig 8.4 create bubble plot of smoky pH
-# place legend on right, change default colors with col.regions
-spplot(smoky, "ph", key.space = "right", cuts = 10,
-       col.regions = hcl.colors(11))
+# change default colors with pal
+# change point style with pch
+plot(smoky["ph"], nbreaks = 10, pal = hcl.colors, pch = 20)
 
 # create gstat object for further analysis
 # formula ph ~ 1 assumes a constant mean over the spatial domain

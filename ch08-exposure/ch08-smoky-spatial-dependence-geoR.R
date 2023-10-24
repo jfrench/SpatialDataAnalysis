@@ -11,7 +11,7 @@ library(geoR) # estimating anisotropic covariance models
 # geoR package function the variogram functions in radians,
 # where radians = degrees/180*pi
 
-# turn smoky dataframe into SpatialPointsDataFrame by adding coordinates
+# load smoky dataframe
 load("./data/smoky.rda")
 
 # create geodata object for geoR

@@ -1,14 +1,10 @@
 # install.packages(c("gstat", "geoR", "rgdal", "sp", "gridExtra", "sf", "colorspace"))
 library(gstat) # for most of the work
-library(sp)
-library(rgdal)
 library(sf)
-library(colorspace)
 
 ### some notes
-# a dataframe (df) can be turned into a SpatialPointsDataFrame
-# using the command coordinates(df) <- c("x", "y") where
-# x and y are the names of the x and y coordinate in df.
+# a dataframe (df) can be turned into an sf
+# data frame using st_as_sf
 
 # the predict function (to perform kriging) takes
 # a gstat object that includes a variogram model
@@ -18,20 +14,22 @@ library(colorspace)
 
 # projections for data and prediction locations must match
 
-# turn smoky dataframe into SpatialPointsDataFrame by adding coordinates
+# turn smoky dataframe into sf data frame
 load("./data/smoky.rda")
-coordinates(smoky) <- c("longitude", "latitude")
+smoky <- sf::st_as_sf(smoky,
+                      coords = c("longitude", "latitude"))
 
 # read polygon of data
-poly = rgdal::readOGR("./data/smoky/smokypoly.shp")
-proj4string(poly)
-proj4string(smoky) #coordinate reference systems don't match!
-proj4string(poly) = CRS(proj4string(smoky))
+poly = sf::st_read("./data/smoky/smokypoly.shp")
+sf::st_crs(poly)
+sf::st_crs(smoky) #coordinate reference systems don't match!
+sf::st_crs(poly) = sf::st_crs(smoky)
+
 
 ### Fig 8.4 create bubble plot of smoky pH
-# place legend on right, change default colors with col.regions
-spplot(smoky, "ph", key.space = "right", cuts = 10,
-       col.regions = hcl.colors(11))
+# change default colors with pal
+# change point style with pch
+plot(smoky["ph"], nbreaks = 10, pal = hcl.colors, pch = 20)
 
 # create gstat object for further analysis
 # formula ph ~ 1 assumes a constant mean over the spatial domain
@@ -50,16 +48,16 @@ v2 = vgm(0.2725, "Exp", 36.25, Err = 0.0325, anis = c(70, 16.93/36.25))
 
 ### Fig 8.14
 # create prediction grid
-grid = spsample(poly, n = 1600, type = "regular") # grid of points within polygon
-coordnames(grid) = c("longitude", "latitude") # coordinate names have to match original data
-gridded(grid) = TRUE # turn into grid for better plotting!
+grid = st_sample(poly, size = 1600, type = "regular") # grid of points within polygon
 
 # gstat objects with anisotropic variogram models for kriging
-ganiso1 = gstat(id = "ph", formula = ph ~ 1, data = smoky, model = v1)
-ganiso2 = gstat(id = "ph", formula = ph ~ 1, data = smoky, model = v2)
+ganiso1 = gstat(id = "ph", formula = ph ~ 1, data = smoky,
+                model = v1)
+ganiso2 = gstat(id = "ph", formula = ph ~ 1, data = smoky,
+                model = v2)
 
-# kriging requires a gstat object, as create above
-# idw only needs a data frame (or SpatialPointsDataFrame)
+# kriging requires a gstat object
+# idw only needs a data frame
 # ordinary kriging
 ok = predict(ganiso1, newdata = grid)
 # filtered ordinary kriging
@@ -68,50 +66,32 @@ fok = predict(ganiso2, newdata = grid)
 idp = idw(ph ~ 1, smoky, newdata = grid)
 
 # plot predictions from ok model
-spplot(ok, "ph.pred", colorkey = TRUE,
-       col.regions = hcl.colors(64), cuts = 63,
-       main = "ok predictions")
+library(ggplot2)
+
+# plot kriging predictions from ok model
+ggplot(ok) +
+  geom_sf(aes(col = ph.pred)) +
+  scale_color_viridis_c()
 
 # plot kriging variance from ok model
-spplot(ok, "ph.var", colorkey = TRUE,
-       col.regions = hcl.colors(64), cuts = 63,
-       main = "ok kriging variance")
+ggplot(ok) +
+  geom_sf(aes(col = ph.var)) +
+  scale_color_viridis_c()
+
 # plot predictions from fok model
-spplot(fok, "ph.pred", colorkey = TRUE,
-       col.regions = hcl.colors(64), cuts = 63,
-       main = "filtered ok predictions")
+ggplot(fok) +
+  geom_sf(aes(col = ph.pred)) +
+  scale_color_viridis_c()
+
 # plot kriging variance from fok model
-spplot(fok, "ph.var", colorkey = TRUE,
-       col.regions = hcl.colors(64), cuts = 63,
-       main = "filtered ok kriging variance")
+ggplot(fok) +
+  geom_sf(aes(col = ph.var)) +
+  scale_color_viridis_c()
+
 # plot predictions from idw
-spplot(idp, "var1.pred", colorkey = TRUE,
-       col.regions = hcl.colors(64), cuts = 63, main = "idw predictions")
-
-# using ggplot2 (perhaps not the most efficient way)
-library(sf)
-sfok <- sf::st_as_sf(ok) # keep points as columns
-# add u- and v-positions to sfok data frame
-sfok = cbind(sfok, sf::st_coordinates(sfok))
-# get u- and v-position of original data
-coordsdf = as.data.frame(coordinates(smoky))
-library(ggplot2)
-# plot predictions
-ggplot() + # start ggplot
-        geom_tile(aes(x = X, y = Y, fill = ph.pred), data = sfok) + # create heat map
-        scale_fill_viridis_c() +
-        coord_fixed() +  # change coordinate reference system
-        geom_point(aes(x = longitude, y = latitude), data = coordsdf) # add observed points
-
-# non tile version
-ggplot(sfok) + geom_sf(aes(col = ph.pred)) + scale_color_viridis_c()
-
-# plot kriging variance
-ggplot() + # start ggplot
-  geom_tile(aes(x = X, y = Y, fill = ph.var), data = sfok) + # create heat map
-  scale_fill_viridis_c() +
-  coord_fixed() +  # change coordinate reference system
-  geom_point(aes(x = longitude, y = latitude), data = coordsdf) # add observed points
+ggplot(idp) +
+  geom_sf(aes(col = var1.pred)) +
+  scale_color_viridis_c()
 
 #### Example of indicator kriging
 # indicator kriging for ph > 8
@@ -124,61 +104,63 @@ ifk = predict(ganiso_i2, newdata = grid)
 
 # compare maps of exceedance probabilities (make sure on same scale)
 range(iok$ph.pred) # negative probabilities!
-allp = c(iok$ph.pred, ifk$ph.pred)
-cut = seq(min(allp), 1, len = 63) # for consistent coloring of graphics
-iokplot = spplot(iok, "ph.pred", colorkey = TRUE,
-                 col.regions = hcl.colors(64), at = cut,
-                 main = "probability map of Pr(ph > 8) ordinary")
-ifkplot = spplot(ifk, "ph.pred", colorkey = TRUE,
-                 col.regions = hcl.colors(64), at = cut,
-                 main = "probability map of Pr(ph > 8) filtered")
-library(gridExtra)
-grid.arrange(iokplot, ifkplot, ncol = 2)
+
+# predictions the same at unsampled locations!
+all.equal(iok$ph.pred, ifk$ph.pred)
+
+# create data frame to create plots side by side
+iksf = rbind(cbind(iok, type = "unfiltered"),
+             cbind(ifk, type = "filtered"))
+
+# plot predictions from indicator kriging model
+ggplot(iksf) + geom_sf(aes(col = ph.pred)) +
+  scale_color_viridis_c() +
+  facet_wrap(~ type) + ggtitle("indicator kriging predictions")
+
+# plot kriging variance from indicator kriging model
+ggplot(iksf) + geom_sf(aes(col = ph.var)) +
+  scale_color_viridis_c() +
+  facet_wrap(~ type) + ggtitle("indicator kriging variance")
 
 #### example of conditional simulation
 # grid of points, fairly coarse.
-# don't converted to gridded data
-grid2 = spsample(poly, n = 100, type = "regular")
-# don't convert grid2 to a grid
+grid2 = st_sample(poly, size = 100, type = "regular")
+# simulate at gridded locations
 ok_sim = predict(ganiso1, newdata = grid2, nsim = 100)
-spplot(ok_sim, "sim1", col.regions = hcl.colors(11), cuts = 10)
 
-gridded(grid2) = TRUE
-ok_sim = predict(ganiso1, newdata = grid2, nsim = 100)
-spplot(ok_sim, "sim1", col.regions = hcl.colors(11), cuts = 10)
+# plot conditional simulations
+ggplot(ok_sim) + geom_sf(aes(col = sim1)) +
+  scale_color_viridis_c()
 
-# coordnames(grid2) = c("longitude", "latitude") # coordinate names have to match original data
-# gridded(grid2) = TRUE # turn into grid for better plotting!
-# ok_sim = predict(ganiso1, newdata = grid2, nsim = 100)
-# plot some of the surfaced.  Colors not on same scale
-spplot(ok_sim, "sim1", col.regions = hcl.colors(11), cuts = 10)
-spplot(ok_sim, "sim2", col.regions = hcl.colors(11), cuts = 10)
-spplot(ok_sim, "sim3", col.regions = hcl.colors(11), cuts = 10)
+ggplot(ok_sim) + geom_sf(aes(col = sim2)) +
+  scale_color_viridis_c()
 
-range_sim = range(data.frame(attr(ok_sim, "data"))) # get range of all conditional simulations
-cut = seq(min(range_sim), max(range_sim), len = 63) # for consistent coloring of graphics
-# construct plots with consistent coloring
-sim1plot = spplot(ok_sim, "sim1",
-                  col.regions = hcl.colors(64), at = cut,
-                  main = "heat map of 1st simulation")
-sim2plot = spplot(ok_sim, "sim2",
-                  col.regions = hcl.colors(64), at = cut,
-                  main = "heat map of 2nd simulation")
-sim3plot = spplot(ok_sim, "sim3",
-                  col.regions = hcl.colors(64), at = cut,
-                  main = "heat map of 3rd simulation")
-grid.arrange(sim1plot, sim2plot, sim3plot, ncol = 3)
+ggplot(ok_sim) + geom_sf(aes(col = sim3)) +
+  scale_color_viridis_c()
 
-## using ggplot2
-sf_sim <- sf::st_as_sf(ok_sim) # keep points as columns
-# add u- and v-positions to sfok data frame
-sf_sim = cbind(sf_sim, sf::st_coordinates(sf_sim))
-sf_sim <- sf_sim[, c("X", "Y", "sim1", "sim2", "sim3")]
+# plot conditional simulations in one plot
 
-# need to make data long (all z values are in 1 columns)
-sf_sim_long <- sf_sim |> tidyr::pivot_longer(cols = c("sim1", "sim2", "sim3"))
-ggplot(data = sf_sim_long) + geom_tile(aes(x = X, y = Y, fill = value)) +
-  facet_grid(~ name) + scale_fill_viridis_c()
+# need to make data long (all z values are in 1 column)
+# also need x, y coordinates as variable
+# the first part of the code creates a single column containing
+# sim1, sim2, sim3
+# the second part adds the associated X, Y coordinates as
+# variables in the data frame
+ok_sim_long <-
+  ok_sim[c("sim1", "sim2", "sim3")] |>
+  tidyr::pivot_longer(cols = c("sim1", "sim2", "sim3")) |>
+  tibble::add_column(X = rep(st_coordinates(ok_sim)[,1], times = 3),
+                     Y = rep(st_coordinates(ok_sim)[,2], times = 3))
 
+# plot 3 simulations simultaneously using plot.sf
+plot(ok_sim[c("sim1", "sim2", "sim3")], pal = hcl.colors,
+     pch = 20, key.pos = 4)
 
+# plot 3 simulations simultaneously using geom_sf
+ggplot(ok_sim_long) + geom_sf(aes(col = value)) +
+  facet_wrap(~name) + scale_color_viridis_c()
 
+# plot rasterized version of 3 simulations using geom_tile
+ggplot(ok_sim_long) +
+  geom_raster(aes(x = X, y = Y, fill = value)) +
+  facet_wrap(~name) + scale_fill_viridis_c()

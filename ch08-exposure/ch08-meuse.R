@@ -2,9 +2,12 @@
 library(sp)
 library(gstat) # for most of the work
 
-data(meuse, package = "sp") #available in sp package
-# turn smoky dataframe into SpatialPointsDataFrame by adding coordinates
-coordinates(meuse) <- c("x", "y")
+data(meuse.all, package = "gstat") #available in sp package
+# turn meuse.all dataframe into sf object
+meuse <- sf::st_as_sf(meuse.all, coords = c("x", "y"))
+
+# plot lead variable
+plot(meuse["lead"], pal = hcl.colors, pch = 20)
 
 # we'll do analysis on log(lead)
 qqnorm(log(meuse$lead))
@@ -24,38 +27,33 @@ plot(vd)
 gmeuse = gstat(id = "lead", formula = log(lead) ~ 1,
                data = meuse, model = f)
 data(meuse.grid) # prediction grid built into gstat
-coordinates(meuse.grid) = ~ x + y
-gridded(meuse.grid) = TRUE
+meuse_grid <- st_as_sf(meuse.grid, coords = c("x", "y"))
+
 # predict response
-oklog = predict(gmeuse, newdata = meuse.grid)
-spplot(oklog, "lead.pred")
+oklog = predict(gmeuse, newdata = meuse_grid)
+plot(oklog["lead.pred"], pal = hcl.colors)
 
 # biased prediction, just take exp of predicted values
 epred = exp(oklog$lead.pred)
 oklog$lead.pred = epred
-spplot(oklog, "lead.pred", col.regions = hcl.colors(64),
-       cuts = 63)
+plot(oklog["lead.pred"], pal = hcl.colors)
 
 # lognormal prediction
 # lambda = 0 means use a log transform.  Related to box-cox transformation
-olk = krigeTg(lead ~ 1, locations = meuse, newdata = meuse.grid,
+olk = krigeTg(lead ~ 1,
+              locations = meuse,
+              newdata = meuse_grid,
               model = f, lambda = 0)
 names(olk) # we want the trans-gaussian kriging predictions
-spplot(olk, "var1TG.pred", col.regions = hcl.colors(64),
-       cuts = 63)
+plot(olk["var1TG.pred"], pal = hcl.colors)
 
-# compare prediction maps on original scale (make sure colors on same scale)
-cut = seq(0, 600, len = 63) # for consistent coloring of graphics
-expplot = spplot(oklog, "lead.pred", colorkey = TRUE,
-                 col.regions = hcl.colors(64), at = cut,
-                 main = "biased predictions of lead")
-olkplot = spplot(olk, "var1TG.pred", colorkey = TRUE,
-                 col.regions = hcl.colors(64), at = cut,
-                 main = "lognormal predictions of lead")
+# join biased and unbiased predictions
+Tgpred <- st_join(oklog, olk)
+
+# plot results side by side
+plot(Tgpred[c("lead.pred", "var1TG.pred")],
+     pal = hcl.colors, key.pos = 4)
+
 # see biasedness more clearly
 head(cbind(oklog$lead.pred, olk$var1TG.pred))
 head(cbind(oklog$lead.pred - olk$var1TG.pred))
-library(gridExtra)
-grid.arrange(expplot, olkplot, ncol = 2)
-
-
