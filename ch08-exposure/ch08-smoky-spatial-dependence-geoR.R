@@ -62,10 +62,14 @@ plot(variog2b)
 lines(fitsphb)
 
 # estimated matern model with starting values c = .25, a = 30, c0 = .05
-fitmatb = variofit(variog2b, ini.cov.pars = c(.25, 30), nugget = 0.05,
-                   cov.model = "matern", weights = "cressie", fix.kappa = FALSE)
-fitmatb  # estimated c0 = 0.0558, c = 0.1683, a = 62.6156, smoothness =
-fitmatb$value # wrss of fit 29.874
+fitmatb = variofit(variog2b, ini.cov.pars = c(.25, 30),
+                   nugget = 0.05,
+                   kappa = 0.75,
+                   cov.model = "matern",
+                   weights = "cressie",
+                   fix.kappa = FALSE)
+fitmatb  # estimated c0 = 0.0529, c = 0.1761, a = 16.36, smoothness =
+fitmatb$value # wrss of fit 29.875
 # the matern model fits the best since it has the smallest RSS
 plot(variog2b)
 # add fitted model to empirical semivariogram

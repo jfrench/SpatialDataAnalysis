@@ -58,14 +58,21 @@ attr(fitsph, "SSErr")
 
 ### fit variogram model using WRSS
 # estimated matern model with starting values c = .25, a = 30, c0 = .05, smoothness = 1
-fitmat = fit.variogram(variog2, vgm(.25, "Sph", 30, .05, kappa = 1), fit.method = 2,
+fitmat = fit.variogram(variog2,
+                       vgm(psill = .25,
+                           model = "Mat",
+                           range = 30,
+                           nugget = .05,
+                           kappa = 1.5),
+                       fit.method = 2,
                        fit.kappa = TRUE)
-fitmat #c = 0.17, a = 63.33, c0 = 0.05
-# plot variogram with estimated spherical model
-plot(variog2, fitmat, main = "WRSS spherical fit")
+fitmat #c = 0.214, a = 63.33, c0 = 0.014
+# plot variogram with estimated matern model
+plot(variog2, fitmat, main = "WRSS matern fit")
+# equivalent to exponential!
 # wrss of fit
 attr(fitmat, "SSErr")
-# the WRSS = 15.9
+# the WRSS = 19.87
 
 ### Fig 8.11
 # plot directional variogram
