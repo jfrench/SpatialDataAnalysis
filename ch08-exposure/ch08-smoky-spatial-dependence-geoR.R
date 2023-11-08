@@ -79,28 +79,48 @@ lines(fitmatb)
 
 # REML estimation covariance parameters of geosmoky for an exponential model
 # with starting values c = .25, a = 30, c0 = 0.05
-lfit_exp = likfit(geosmoky, ini.cov.pars = c(.25, 30), nugget = 0.05,
-                  cov.model = "exponential", lik.method = "REML")
+lfit_exp = likfit(geosmoky,
+                  ini.cov.pars = c(.25, 30),
+                  nugget = 0.05,
+                  cov.model = "exponential",
+                  lik.method = "REML")
 lfit_exp # c = .1929, a = 10.97, c0 = 0, muhat = 7.1929
+summary(lfit_exp)
+# Maximised Likelihood:
+#   log.L n.params      AIC      BIC
+# "-26.95"      "4"  "61.91"  "71.18"
 
 # estimate an isotropic matern covariance model with and estimating the
 # smoothness parameter (kappa). Note fix.kappa = FALSE.'
 # with starting values c = .25, a = 30, c0 = 0.05, smoothness = 0.5
-lfit_mat = likfit(geosmoky, ini.cov.pars = c(.25, 30), nugget = 0.05,
-                  cov.model = "matern", lik.method = "REML", kappa = 1,
+lfit_mat = likfit(geosmoky, ini.cov.pars = c(.25, 30),
+                  nugget = 0.05,
+                  cov.model = "matern",
+                  lik.method = "REML", kappa = 1,
                   fix.kappa = FALSE)
-lfit_mat # c = .1841, a = 7.1482, c0 = 0, smoothness = 0.6872, muhat = 7.1663
+lfit_mat # c = .1841, a = 7.1482, c0 = 0,
+         # smoothness = 0.6872, muhat = 7.1663
+# Maximised Likelihood:
+#   log.L n.params      AIC      BIC
+# "-26.71"      "5"  "63.42"  "75.01"
+
+# we prefer the exponential model
+# to the matern model because
+# both the AIC and BIC statistics are smaller
+# for the exponential model
 
 ### Fig 8.11
 # plot directional variogram
 # direction are 70, 115, 160, 205 (205 - 180 = 25) degrees
 # same (general) thing using geoR.  Angles must be between 0 and 180.  I get 25 from 205 - 180
 # geoR specifies direction in radians, which is degrees/180*pi
-variog3b = variog4(geosmoky, direction = c(25, 70, 115, 160)/180*pi, max.dist = 120)
+variog3b = variog4(geosmoky,
+                   direction = c(25, 70, 115, 160)/180*pi,
+                   max.dist = 120)
 plot(variog3b)
 
-# geoR can't estimate anisotropic semivariogram models, so we must use
-# likelihood-based methods
+# geoR can't estimate anisotropic semivariogram models
+# so we must use likelihood-based methods
 
 # fit geometric anisotropy covariance model using REML
 # psiA controls the anisotropy angle. This is the direction of amin.
@@ -114,32 +134,47 @@ plot(variog3b)
 # the /180*pi converts the angle to radians
 # ini.cov.pars = c(c, amaj), nugget = c0
 # initial angle of 70 degrees, initial amaj/amin = 3
-lfit1 = likfit(geosmoky, ini.cov.pars = c(.25, 30), nugget = 0.05,
-               cov.model = "exponential", lik.method = "REML",
+lfit1 = likfit(geosmoky, ini.cov.pars = c(.25, 30),
+               nugget = 0.05,
+               cov.model = "exponential",
+               lik.method = "REML",
                psiA = 70/180*pi, psiR = 3)
-lfit1 # muhat = 7.2349, c0 = 0.0044, c = 0.2198, amin = 9.4746, psiA = 70 degrees, psiR = 3
+lfit1 # muhat = 7.2349, c0 = 0.0044, c = 0.2198,
+      # amin = 9.4746, psiA = 70 degrees, psiR = 3
+
 # estimate an anisotropic exponential covariance model with fixed angle but also estimates
 # the ratio of amaj/amin (amax/amin). Use fix.psiR = FALSE.
-lfit2 = likfit(geosmoky, ini.cov.pars = c(.25, 30), nugget = 0.05,
-               cov.model = "exponential", lik.method = "REML",
-               psiA = 70/180*pi, psiR = 3, fix.psiR = FALSE)
-lfit2 # muhat = 7.19, c0 = 0.0016, c = 0.1880, amin = 10.82, psiA = 70 degrees, psiR = 1.91
+lfit2 = likfit(geosmoky, ini.cov.pars = c(.25, 30),
+               nugget = 0.05,
+               cov.model = "exponential",
+               lik.method = "REML",
+               psiA = 70/180*pi, psiR = 3,
+               fix.psiR = FALSE)
+lfit2 # muhat = 7.19, c0 = 0.0016, c = 0.1880,
+      # amin = 10.82, psiA = 70 degrees, psiR = 1.91
 
 # estimate an anisotropic exponential covariance model with both angle and ratio
 # being estimated. Note fix.psiR (ratio) = FALSE, and fix.psiA = FALSE.
-lfit3 = likfit(geosmoky, ini.cov.pars = c(.25, 30), nugget = 0.05,
-               cov.model = "exponential", lik.method = "REML",
-               psiA = 70/180*pi, psiR = 3, fix.psiR = FALSE, fix.psiA = FALSE)
-lfit3 # muhat = 7.21, c0 = 0.0039, c = 0.2013, amin = 12.83, psiA = 0.92 radians, psiR = 3.07
+lfit3 = likfit(geosmoky, ini.cov.pars = c(.25, 30),
+               nugget = 0.05,
+               cov.model = "exponential",
+               lik.method = "REML",
+               psiA = 70/180*pi, psiR = 3,
+               fix.psiR = FALSE, fix.psiA = FALSE)
+lfit3 # muhat = 7.21, c0 = 0.0039, c = 0.2013,
+      # amin = 12.83, psiA = 0.92 radians, psiR = 3.07
 
 # estimate an anisotropic matern covariance model with smoothness, angle, and ratio
 # being estimated. Note fix.kappa = FALSE (smoothness).
 # Note fix.psiR (ratio) = FALSE, and fix.psiA = FALSE.
-lfit4 = likfit(geosmoky, ini.cov.pars = c(.25, 30), nugget = 0.05, kappa = 1,
+lfit4 = likfit(geosmoky, ini.cov.pars = c(.25, 30),
+               nugget = 0.05, kappa = 1,
                cov.model = "matern", lik.method = "REML",
-               psiA = 70/180*pi, psiR = 3, fix.psiR = FALSE, fix.psiA = FALSE,
+               psiA = 70/180*pi, psiR = 3,
+               fix.psiR = FALSE, fix.psiA = FALSE,
                fix.kappa = FALSE)
-lfit4 # muhat = 7.61, c0 = 0, c = 2.54, amin = 903.01, kappa = 0.35, psiA = 0.85 radians, psiR = 2.93
+lfit4 # muhat = 7.61, c0 = 0, c = 2.54, amin = 903.01,
+      # kappa = 0.35, psiA = 0.85 radians, psiR = 2.93
 
 # compare AIC/BIC values.  Model 3 is best in terms of AIC since it has the
 # smallest AIC, but we'll use model 2 because that's what the book uses

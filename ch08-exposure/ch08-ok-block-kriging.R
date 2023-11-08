@@ -11,8 +11,7 @@ spplot(co, "Al")
 
 # read colorado zctas
 # set working directory
-setwd("~/OneDrive - The University of Colorado Denver/Teaching/Math6384/Data/co_zcta")
-zctas = readOGR(".", "Colorado_ZIP_Code_Tabulation_Areas_ZCTA")
+zctas = readOGR("./data/co_zcta", "Colorado_ZIP_Code_Tabulation_Areas_ZCTA")
 plot(zctas, axes = TRUE)
 # convert longitude/latitude to UTM coordinates zone 13
 zctas = spTransform(zctas, "+proj=utm +zone=13 +datum=NAD83")

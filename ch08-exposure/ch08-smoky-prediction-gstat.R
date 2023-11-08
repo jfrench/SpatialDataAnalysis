@@ -93,13 +93,33 @@ ggplot(idp) +
   geom_sf(aes(col = var1.pred)) +
   scale_color_viridis_c()
 
+# plot standard and filtered kriging predictions
+# on the same scale
+# create data frame to create plots side by side
+psf = rbind(cbind(ok, type = "standard"),
+            cbind(fok, type = "filtered"))
+
+# plot predictions from indicator kriging model
+ggplot(psf) + geom_sf(aes(col = ph.pred)) +
+  scale_color_viridis_c() +
+  facet_wrap(~ type) +
+  ggtitle("kriging predictions")
+
+# plot predictions from indicator kriging model
+ggplot(psf) + geom_sf(aes(col = ph.var)) +
+  scale_color_viridis_c() +
+  facet_wrap(~ type) +
+  ggtitle("kriging variance")
+
 #### Example of indicator kriging
 # indicator kriging for ph > 8
 # ordinary indicator kriging
-ganiso_i1 = gstat(id = "ph", formula = (ph > 8 + 0) ~ 1, data = smoky, model = v1)
+ganiso_i1 = gstat(id = "ph", formula = (ph > 8 + 0) ~ 1,
+                  data = smoky, model = v1)
 iok = predict(ganiso_i1, newdata = grid)
 # filtered indicator kriging
-ganiso_i2 = gstat(id = "ph", formula = (ph > 8 + 0) ~ 1, data = smoky, model = v2)
+ganiso_i2 = gstat(id = "ph", formula = (ph > 8 + 0) ~ 1,
+                  data = smoky, model = v2)
 ifk = predict(ganiso_i2, newdata = grid)
 
 # compare maps of exceedance probabilities (make sure on same scale)
@@ -109,7 +129,7 @@ range(iok$ph.pred) # negative probabilities!
 all.equal(iok$ph.pred, ifk$ph.pred)
 
 # create data frame to create plots side by side
-iksf = rbind(cbind(iok, type = "unfiltered"),
+iksf = rbind(cbind(iok, type = "standard"),
              cbind(ifk, type = "filtered"))
 
 # plot predictions from indicator kriging model
@@ -126,7 +146,7 @@ ggplot(iksf) + geom_sf(aes(col = ph.var)) +
 # grid of points, fairly coarse.
 grid2 = st_sample(poly, size = 100, type = "regular")
 # simulate at gridded locations
-ok_sim = predict(ganiso1, newdata = grid2, nsim = 100)
+ok_sim = predict(ganiso1, newdata = grid2, nsim = 3)
 
 # plot conditional simulations
 ggplot(ok_sim) + geom_sf(aes(col = sim1)) +

@@ -37,7 +37,8 @@ variog2$np # gstat
 
 ### Table 8.1 fit variogram model using WRSS
 # estimated exponential model with starting values c = .25, a = 30, c0 = .05
-fitexp = fit.variogram(variog2, vgm(.25, "Exp", 30, .05),
+fitexp = fit.variogram(variog2,
+                       vgm(.25, "Exp", 30, .05),
                        fit.method = 2)
 fitexp #c = 0.214, a = 22.55, c0 = 0.0138
 # plot variogram with estimated exponential model
@@ -66,7 +67,7 @@ fitmat = fit.variogram(variog2,
                            kappa = 1.5),
                        fit.method = 2,
                        fit.kappa = TRUE)
-fitmat #c = 0.214, a = 63.33, c0 = 0.014
+fitmat #c = 0.214, a = 22.54, c0 = 0.014, kappa = 0.5
 # plot variogram with estimated matern model
 plot(variog2, fitmat, main = "WRSS matern fit")
 # equivalent to exponential!
@@ -81,10 +82,12 @@ variog3 = variogram(gsmoky, alpha = c(70, 115, 160, 205))
 plot(variog3)
 
 ### Fig 8.12
-# show fit of anisotropic model
-# the numbers come from output of the likfit function from the geoR package
-# note that likfit parameterized a parameter in terms of aminor, not amajor
-# so we have to convert it to amaj (amin * psiR).  We need to convert the ratio in anis
-# to the minor/major ratio, i.e., 1/psiR
-vgmaniso = vgm(.188, "Exp", 10.82*1.91, .0016, anis = c(70, 1/1.91))
+# show fit of anisotropic model the numbers come from output
+# of the likfit function from the geoR package note that
+# likfit parameterized a parameter in terms of aminor, not
+# amajor so we have to convert it to amaj (amin * psiR).  We
+# need to convert the ratio in anis to the minor/major
+# ratio, i.e., 1/psiR
+vgmaniso = vgm(.188, "Exp", 10.82*1.91, .0016,
+               anis = c(70, 1/1.91))
 plot(variog3, vgmaniso)

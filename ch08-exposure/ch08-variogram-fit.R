@@ -18,12 +18,15 @@ nbins <- vhat$n # number of pairs in each bin
 
 # fit exponential model using geoR package
 fitexp = variofit(vhat, ini.cov.pars = c(.25, 30),
-                  nugget = 0.05, cov.model = "exponential",
+                  nugget = 0.05,
+                  cov.model = "exponential",
                   weights = "cressie")
 fitexp$cov.pars # estimated c = 0.283, a = 86.94
 fitexp$nugget #estimated c0 = 0.085
+fitexp$value/2 # the wrss
 
 # create objective function
+# theta = c(c, a, c0)
 vfit <- function(theta) {
   # evaluate exponential model
   gammamod <- theta[3] + theta[1] * (1 - exp(-h/theta[2]))
