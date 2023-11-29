@@ -89,6 +89,7 @@ c(beta = betatilde, psill = psilltilde, a = 0.2475395, c0 = c0)
 # mod covariance model:
 # r = range parameter (a)
 # evar = c0 (error variance for filter model)
+df <- data.frame(x1 = coords[,1], x2 = coords[,2], y = y)
 geolmod <- geolm(formula = y ~ x1, data = df, coordnames = c("x1", "x2"),
                  mod = cmod_std(model = "exponential", psill = 0.5,
                                 r = 0.2, evar = 0.1))

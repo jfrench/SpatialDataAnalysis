@@ -1,26 +1,27 @@
 # install.packages(c("gstat", "geoR", "fields", "maptools", "gridExtra"))
 library(gstat) # for most of the work
-library(sp) # for Spatial... obects
-library(rgdal) # to read shapefile and spTransform
+library(sf)
 library(splines) # for ns
-library(colorspace) # for terrain_hcl
+library(ggplot2) # for closing plots
 
 # load colorado data
 data(co, package = "gear")
-coordinates(co) = c("easting", "northing")
-spplot(co, "Al")
+co <- st_as_sf(co, coords = c("easting", "northing"),
+               remove = FALSE)
+plot(co["Al"], pal = hcl.colors, pch = 20)
 
 # read colorado zctas
 # set working directory
-setwd("~/OneDrive - The University of Colorado Denver/Teaching/Math6384/Data/co_zcta")
-zctas = readOGR(".", "Colorado_ZIP_Code_Tabulation_Areas_ZCTA")
-plot(zctas, axes = TRUE)
-# convert longitude/latitude to UTM coordinates zone 13
-zctas = spTransform(zctas, "+proj=utm +zone=13 +datum=NAD83")
-plot(zctas, axes = TRUE)
+zctas = st_read("./data/Colorado_ZIP_Code_Tabulation_Areas_ZCTA.shp")
+plot(st_geometry(zctas), axes = TRUE)
+# convert longitude/latitude to UTM coordinates zone 13 using epsg
+zctas = st_transform(zctas, 32613)
+# make sure coordinate systems match up
+plot(st_geometry(zctas), axes = TRUE)
+points(st_coordinates(co), col = "orange", pch = 19)
 
 # ensure coordinate reference systems are the same
-proj4string(co) = CRS(proj4string(zctas))
+st_crs(co) = st_crs(zctas)
 
 # estimate omnidirectional semivariogram
 # for aluminum (for simplicity, we won't
@@ -31,8 +32,9 @@ gco = gstat(id = "Al",
 
 # crude fit
 vco = variogram(gco, cutoff = 350000)
-fit.vco = fit.variogram(vco, vgm(psill = 0.5, model = "Sph",
-                                 range = 3e5, nugget = 1),
+fit.vco = fit.variogram(vco,
+                        vgm(psill = 0.5, model = "Sph",
+                            range = 3e5, nugget = 1),
                         fit.method = 2)
 plot(vco, fit.vco)
 
@@ -43,45 +45,36 @@ gco = gstat(id = "Al",
             model = fit.vco)
 
 # point kriging prediction
-coordnames(zctas) = c("easting", "northing")
-# have to make coordinate names match
-coords = coordinates(zctas)
-colnames(coords) = c("easting", "northing")
-centroids = SpatialPoints(coords,
-                          proj4string = CRS(proj4string(zctas)))
+centroids <- st_coordinates(st_centroid(zctas))
+centroids <- st_as_sf(data.frame(easting = centroids[,1],
+                                 northing = centroids[,2]),
+                      coords = c("easting", "northing"),
+                      remove = FALSE,
+                      crs = st_crs(co))
+# predict at centroids
 p_point = predict(gco, newdata = centroids)
 
+# block kriging
+# add covariate columns
+zctas$easting <- centroids$easting
+zctas$northing <- centroids$northing
+p_block = predict(gco, newdata = zctas)
 
-# block kriging prediction
-# create vector for grid for each polygon
-poly_grids = vector("list", length(zctas@polygons))
-for (i in seq_along(zctas@polygons)) {
-  # predict on grid within each region
-  border = zctas@polygons[[1]]@Polygons[[1]]
-  g = spsample(zctas[i,], type = "regular", n = 50)
-  coordnames(g) = c("easting", "northing")
-  poly_grids[[i]] = g
-}
+# combine predictions into single data frame
+p_point_block <- rbind(
+  cbind(p_point[c("Al.pred", "Al.var")], type = "point"),
+  cbind(p_block[c("Al.pred", "Al.var")], type = "block"))
 
-# number of points in grid for each zcta
-ng = sapply(poly_grids, function(x) nrow(x@coords))
-# collapse grid points
-newdata = sapply(poly_grids, function(x) x@coords)
-# rbind grid points for each component of the list
-newdata = do.call(rbind, poly_grids)
+# plot of predictions
+ggplot(p_point_block) +
+  geom_sf(aes(fill = Al.pred, color = Al.pred)) +
+  facet_wrap(~ type) +
+  scale_fill_viridis_c() +
+  scale_color_viridis_c()
 
-# takes awhile since there are a lot of points
-p_block = predict(gco, newdata = newdata)
-# average predictions for each polygon
-avg_Al = tapply(X = p_block$Al.pred,
-                INDEX = rep(seq_along(ng), times = ng),
-                FUN = mean)
-# add average value to zctas SpatialPolygonsDataFrame
-zctas$avg_Al = avg_Al
-# plot results for block kriging
-spplot(zctas, "avg_Al", cuts = 11,
-       col.regions = colorspace::terrain_hcl(12))
-# compare to point prediction
-spplot(p_point, "Al.pred", cuts = 11,
-       col.regions = colorspace::terrain_hcl(12),
-       key.space = "right")
+# plot of kriging variance
+ggplot(p_point_block) +
+  geom_sf(aes(fill = Al.var, color = Al.var)) +
+  facet_wrap(~ type) +
+  scale_fill_viridis_c() +
+  scale_color_viridis_c()

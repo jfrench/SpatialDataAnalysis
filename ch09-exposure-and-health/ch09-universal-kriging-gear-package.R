@@ -2,7 +2,8 @@ library(gear) # for most of the work
 library(sf) # for plotting
 
 load("./data/smoky.rda")
-smoky_points <- st_as_sf(smoky, coords = c("longitude", "latitude"))
+smoky_points <- st_as_sf(smoky,
+                         coords = c("longitude", "latitude"))
 
 ### create bubble plot of smoky pH
 # place legend on right, change default colors with col.regions
@@ -49,7 +50,9 @@ smoky_geolmod_aniso
 smoky_geolmod_aniso$mod
 
 # create prediction grid
-pgrid <- st_sample(smoky_poly, 1000, type = "regular", exact = FALSE)
+pgrid <- st_sample(smoky_poly, 1000,
+                   type = "regular",
+                   exact = FALSE)
 plot(pgrid)
 # extract grid coordinates
 ppoints <- st_coordinates(pgrid)
@@ -58,11 +61,13 @@ ppoints <- as.data.frame(ppoints)
 colnames(ppoints) <- c("longitude", "latitude")
 
 # predict at prediction locations (isotropic model)
-piso <- predict(smoky_geolmod_iso, newdata = ppoints, return_type = "sf")
+piso <- predict(smoky_geolmod_iso, newdata = ppoints,
+                return_type = "sf")
 # bubble plot
-plot(piso, pal = hcl.colors)
+plot(piso, pal = hcl.colors, pch = 20)
 
 # predict at prediction locations (anisotropic model)
-paniso <- predict(smoky_geolmod_aniso, newdata = ppoints, return_type = "sf")
+paniso <- predict(smoky_geolmod_aniso, newdata = ppoints,
+                  return_type = "sf")
 # bubble plot
-plot(paniso, pal = hcl.colors)
+plot(paniso, pal = hcl.colors, pch = 20)

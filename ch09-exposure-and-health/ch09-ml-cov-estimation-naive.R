@@ -1,4 +1,5 @@
 library(mvtnorm) # for rmvnorm, dmvnorm
+library(gear) # for evgram
 
 ### covariance parameter estimation for non-stationary mean
 
@@ -47,6 +48,9 @@ conc.ll = function(theta) {
 # construct empirical semivariogram using gear package to
 # find reasonable starting values for covariance parameters
 df = data.frame(y, x1 = coords[,1], x2 = coords[,2])
+# detrend data before estimating semivariogram
+ev = evgram(y ~ x1, data = df, coordnames = ~ x1 + x2)
+plot(ev, ylim = c(0, 0.7))
 
 # start is the starting parameter estimates
 # objective is the function to minimize

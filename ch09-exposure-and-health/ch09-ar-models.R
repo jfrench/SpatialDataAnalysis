@@ -31,8 +31,10 @@ text(st_coordinates(TCE), labels=as.character(TCE$name), cex=0.7,
 par(mfrow = c(1, 1))
 
 # fit ols lm based on 3 covariates
-nylm <- lm(Z ~ PEXPOSURE + PCTAGE65P + PCTOWNHOME, data = NY8)
-summary(nylm) # exposure to TCE doesn't appear important, though the
+nylm <- lm(Z ~ PEXPOSURE + PCTAGE65P + PCTOWNHOME,
+           data = NY8)
+summary(nylm)
+# exposure to TCE doesn't appear important, though the
 # other census variables are.
 
 # add residuals from lm fit to NY8
@@ -46,7 +48,7 @@ NYlistw <- nb2listw(NY_nb, style = "B")
 lm.morantest(nylm, NYlistw)
 
 # fit one-parameter SAR model with same covariates
-nysar <- spatialreg::spautolm(Z ~ PEXPOSURE + PCTAGE65P + PCTOWNHOME,
+nysar <- spautolm(Z ~ PEXPOSURE + PCTAGE65P + PCTOWNHOME,
                   data = NY8, listw = NYlistw)
 summary(nysar)
 # conclude that (lambda, i.e., rho in our book) is different
@@ -72,11 +74,12 @@ b <- ggplot(NY8) + geom_sf(aes(fill = sar_stochastic)) +
 # use patchwork to plot a and b side-by-side
 a + b
 
-# changes weights from ls regression.
-# Residual Weights are proportional to population sizes in each region.
-# The variance associated with each observation is inversely proportional
-# to the population
-nylmw <- lm(Z ~ PEXPOSURE + PCTAGE65P + PCTOWNHOME, data = NY8,
+# changes weights from ls regression. Residual Weights are
+# proportional to population sizes in each region. The
+# variance associated with each observation is inversely
+# proportional to the population
+nylmw <- lm(Z ~ PEXPOSURE + PCTAGE65P + PCTOWNHOME,
+            data = NY8,
             weights = POP8)
 summary(nylmw)
 # TCE exposure significant with expected sign!
@@ -92,16 +95,19 @@ b2 <- ggplot(NY8) + geom_sf(aes(fill = lmwresid)) +
 # use patchwork to plot a and b side-by-side
 a2 + b2
 
-# check moran's after accounting for heterogeneous population sizes
+# check moran's after accounting for heterogeneous
+# population sizes
 lm.morantest(nylmw, NYlistw)
 # model mispecification (rho != 0) in first test caused by
-# heteroskedasticity more than to spatial autocorrelation?
+# heteroskedasticity rather than spatial autocorrelation?
 
-# SAR model with different weights, that account for heterogeneous
-# population sizes.  Fit sar model with different weights for Vv.  Specifically,
-# Vv propto 1/ni for each region i
-nysarw <- spatialreg::spautolm(Z ~ PEXPOSURE + PCTAGE65P + PCTOWNHOME,
-                   data = NY8, listw = NYlistw, weights = POP8)
+# SAR model with different weights, that account for
+# heterogeneous population sizes.  Fit sar model with
+# different weights for Vv.  Specifically, Vv propto 1/ni
+# for each region i
+nysarw <- spautolm(Z ~ PEXPOSURE + PCTAGE65P + PCTOWNHOME,
+                   data = NY8, listw = NYlistw,
+                   weights = POP8)
 summary(nysarw)
 # no traces of spatial autocorrelation after adjusting for the
 # heterogeneous population sizes
@@ -121,16 +127,18 @@ a3 + b3
 b + b3
 
 # fit one-parameter car model
-nycar <- spatialreg::spautolm(Z ~ PEXPOSURE + PCTAGE65P + PCTOWNHOME,
-                  data = NY8, family = "CAR", listw = NYlistw)
+nycar <- spautolm(Z ~ PEXPOSURE + PCTAGE65P + PCTOWNHOME,
+                  data = NY8, family = "CAR",
+                  listw = NYlistw)
 summary(nycar)
 # the rho parameter is significant.  Suggests spatial
 # autocorrelation
 
 # fit car model with different weights for Vc.  Specifically,
 # Vc propto 1/ni for each region i
-nycarw <- spatialreg::spautolm(Z ~ PEXPOSURE + PCTAGE65P + PCTOWNHOME,
-                   data = NY8, family = "CAR", listw = NYlistw, weights = POP8)
+nycarw <- spautolm(Z ~ PEXPOSURE + PCTAGE65P + PCTOWNHOME,
+                   data = NY8, family = "CAR",
+                   listw = NYlistw, weights = POP8)
 summary(nycarw)
 # spatial autocorrelation vanishes again
 
@@ -145,12 +153,12 @@ a4 <- ggplot(NY8) + geom_sf(aes(fill = fitsarw)) +
 b4 <- ggplot(NY8) + geom_sf(aes(fill = fitcarw)) +
   scale_fill_viridis_c(limits = sar_car_limits)
 # use patchwork to plot a and b side-by-side
-a4 + b4 # plot fitted values from sarw and carw (using two color palettes)
+a4 + b4 # plot fitted values from sarw and carw
 
 # compare fitted values, manually
 NY8$fitsarw - NY8$fitcarw
 
-# overall conclusion
-# we probably didn't need to account for spatial autocorrelation, assuming
-# we accounted for varying population sizes.  Spatial patterns driven by
-# population sizes, not true residual spatial autocorrelation.
+# overall conclusion we probably didn't need to account for
+# spatial autocorrelation, assuming we accounted for varying
+# population sizes.  Spatial patterns driven by population
+# sizes, not true residual spatial autocorrelation.

@@ -1,25 +1,31 @@
-library(rgdal) # read shapefile
 library(gstat) # for most of the work
-library(sp) # for plotting
+library(sf)
 
 load("./data/smoky.rda")
 
-# turn smoky dataframe into SpatialPointsDataFrame by adding coordinates
-coordinates(smoky) <- c("longitude", "latitude")
+# turn smoky data frame into sf data frame
+# remove = TRUE means keep coordinate columns as
+# variables in data frame
+smoky <- sf::st_as_sf(smoky,
+                      coords = c("longitude", "latitude"),
+                      remove = FALSE)
 
-### create bubble plot of smoky pH
-# place legend on right, change default colors with col.regions
-spplot(smoky, "ph", key.space = "right", cuts = 10, col.regions = topo.colors(11))
+plot(smoky["ph"], pch = 20, pal = hcl.colors)
 
 # read polygon of data
-poly = rgdal::readOGR("./data/smoky/smokypoly.shp")
-proj4string(poly)
-proj4string(smoky) #coordinate reference systems don't match!
-proj4string(poly) = CRS(proj4string(smoky))
+poly = sf::st_read("./data/smoky/smokypoly.shp")
+sf::st_crs(poly)
+sf::st_crs(smoky) #coordinate reference systems don't match!
+sf::st_crs(poly) = sf::st_crs(smoky)
 
-grid = spsample(poly, n = 1600, type = "regular") # grid of points within polygon
-coordnames(grid) = c("longitude", "latitude") # coordinate names have to match original data
-gridded(grid) = TRUE # turn into grid for better plotting!
+# create prediction grid
+pgrid = st_sample(poly, size = 1600, type = "regular")
+# extract coordinates from pgrid
+pcoords = st_coordinates(pgrid)
+# need to add longitude and latitude as variables in sf data frame
+pdf = data.frame(longitude = pcoords[,1], latitude = pcoords[,2])
+pdf = st_as_sf(pdf, coords = c("longitude", "latitude"),
+               remove = FALSE)
 
 # universal kriging in gstat
 # notice that formula includes predictor variables
@@ -35,23 +41,25 @@ v # see estimates
 plot(variog, v) # fits well
 
 # add variogram model to uksmoky
-uksmoky = gstat(id = "ph", formula = ph ~ longitude + latitude, data = smoky, model = v)
+uksmoky = gstat(id = "ph",
+                formula = ph ~ longitude + latitude,
+                data = smoky,
+                model = v)
 
 # make universal kriging predictions on grid
-uk = predict(uksmoky, grid)
+uk = predict(uksmoky,pdf)
 
 # plot prediction from uk
-spplot(uk, "ph.pred", colorkey = TRUE, col.regions = hcl.colors(64), cuts = 63, main = "uk predictions")
-# plot kriging variance from uk
-spplot(uk, "ph.var", colorkey = TRUE, col.regions = hcl.colors(64), cuts = 63)
+plot(uk["ph.pred"], pal = hcl.colors)
+plot(uk["ph.var"], pal = hcl.colors)
 
 # evaluate covariance matrix for observed data
 # determine distances
-d = as.matrix(dist(coordinates(smoky)))
+d = as.matrix(dist(st_coordinates(smoky)))
 # determine estimated covariance matrix
-C = .131 * exp(-d/18.97) + 0.043 * diag(nrow(coordinates(smoky)))
+C = .131 * exp(-d/18.97) + 0.043 * diag(nrow(st_coordinates(smoky)))
 # create X matrix
-X = cbind(1, coordinates(smoky))
+X = cbind(1, st_coordinates(smoky))
 # determine betahat gls
 betahat_gls = solve(crossprod(X, solve(C, X)), t(X) %*% solve(C, smoky$ph))
 # determine residuals
@@ -61,41 +69,23 @@ smoky$r = r
 # create gstat object for smoky residuals
 rsmoky = gstat(id = "r", formula = r ~ 1, data = smoky, model = v)
 # make ordinary kriging predictions of residual on grid
-rok = predict(rsmoky, grid)
+rok = predict(rsmoky, pdf)
 # add trend back into ordinary kriging predictions
-rhat = cbind(1, coordinates(grid)) %*% betahat_gls + rok$r.pred
+rhat = cbind(1, st_coordinates(pdf)) %*% betahat_gls + rok$r.pred
 
 # predictions the same (subject to rounding)
 range(rhat - uk$ph.pred)
 head(cbind(rhat, uk$ph.pred))
 
-# plot ordinary and universal kriging variances on one plot
-cut = seq(0, max(uk$ph.var), len = 63) # for consistent coloring of graphics
-# construct plots with consistent coloring
-okvar = spplot(rok, "r.var", col.regions = hcl.colors(64),
-               at = cut, main = "ordinary kriging variance")
-ukvar = spplot(uk, "ph.var", col.regions = hcl.colors(64),
-               at = cut, main = "universal kriging variance")
-library(gridExtra)
-grid.arrange(okvar, ukvar, ncol = 2)
-# compare kriging variances
-head(cbind(rok$r.var, uk$ph.var))
-# determine proportions of kriging variances that are
-# smaller for ok than uk
-mean(rok$r.var <= uk$ph.var)
+# add ok variance to uk object for comparison
+uk$ph.var.ok <- rok$r.var
 
-# how to do this in one plot
-combine_var = cbind(rok, uk)
-spplot(combine_var, c("r.var", "ph.var"), col.regions = hcl.colors(64),
-       cuts = 63, main = c("ok var", "uk var"))
+# plot kriging variances
+plot(uk[c("ph.var", "ph.var.ok")],
+     pch = 20,
+     pal = hcl.colors, key.pos = -1)
 
-# create_difference of universal kriging variance - ordinary kriging variance
-combine_var$var_diff <- combine_var$ph.var - combine_var$r.var
+# difference in variances
+uk$ph.var.diff <- uk$ph.var - uk$ph.var.ok
 
-diffplot = spplot(combine_var, "var_diff", col.regions = hcl.colors(64),
-               cuts = 63, main = "diff of uk.var - ok.var")
-ukvar = spplot(uk, "ph.var", col.regions = hcl.colors(64),
-               cuts = 63, main = "universal kriging variance")
-grid.arrange(ukvar, diffplot, ncol = 2)
-
-
+plot(uk["ph.var.diff"], pal = hcl.colors, pch = 20)
