@@ -14,7 +14,8 @@ plot(co["Al"], pal = hcl.colors, pch = 20)
 # set working directory
 zctas = st_read("./data/Colorado_ZIP_Code_Tabulation_Areas_ZCTA.shp")
 plot(st_geometry(zctas), axes = TRUE)
-# convert longitude/latitude to UTM coordinates zone 13 using epsg
+# convert longitude/latitude to UTM coordinates zone 13
+# using epsg
 zctas = st_transform(zctas, 32613)
 # make sure coordinate systems match up
 plot(st_geometry(zctas), axes = TRUE)

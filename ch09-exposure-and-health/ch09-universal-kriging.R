@@ -18,20 +18,28 @@ sf::st_crs(poly)
 sf::st_crs(smoky) #coordinate reference systems don't match!
 sf::st_crs(poly) = sf::st_crs(smoky)
 
+# verify that they are in fact the same crs
+plot(st_geometry(poly))
+points(st_coordinates(smoky))
+
 # create prediction grid
 pgrid = st_sample(poly, size = 1600, type = "regular")
 # extract coordinates from pgrid
 pcoords = st_coordinates(pgrid)
 # need to add longitude and latitude as variables in sf data frame
-pdf = data.frame(longitude = pcoords[,1], latitude = pcoords[,2])
+pdf = data.frame(longitude = pcoords[,1],
+                 latitude = pcoords[,2])
 pdf = st_as_sf(pdf, coords = c("longitude", "latitude"),
                remove = FALSE)
 
 # universal kriging in gstat
 # notice that formula includes predictor variables
-uksmoky = gstat(id = "ph", formula = ph ~ longitude + latitude, data = smoky)
+uksmoky = gstat(id = "ph",
+                formula = ph ~ longitude + latitude,
+                data = smoky)
 # create directional variogram for residuals to see if we have anisotropy
-variog4 = variogram(uksmoky, cutoff = 90, alpha = c(70, 115, 160, 205))
+variog4 = variogram(uksmoky, cutoff = 90,
+                    alpha = c(70, 115, 160, 205))
 plot(variog4) # no evidence of anisotropy
 
 # create omnidirectional variogram for uk
@@ -47,7 +55,7 @@ uksmoky = gstat(id = "ph",
                 model = v)
 
 # make universal kriging predictions on grid
-uk = predict(uksmoky,pdf)
+uk = predict(uksmoky, pdf)
 
 # plot prediction from uk
 plot(uk["ph.pred"], pal = hcl.colors)
@@ -67,7 +75,10 @@ r = smoky$ph - X %*% betahat_gls
 # add residuals to smoky df
 smoky$r = r
 # create gstat object for smoky residuals
-rsmoky = gstat(id = "r", formula = r ~ 1, data = smoky, model = v)
+rsmoky = gstat(id = "r",
+               formula = r ~ 1,
+               data = smoky,
+               model = v)
 # make ordinary kriging predictions of residual on grid
 rok = predict(rsmoky, pdf)
 # add trend back into ordinary kriging predictions

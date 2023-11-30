@@ -54,7 +54,7 @@ plot(ev, ylim = c(0, 0.7))
 
 # start is the starting parameter estimates
 # objective is the function to minimize
-# lower contrains the parameters to be no less than lower
+# lower constrains the parameters to be no less than lower
 # upper constrains the parameters to be no more than upper
 nlminb(start = c(0.4, 0.4, 0.1),
        objective = conc.ll,
