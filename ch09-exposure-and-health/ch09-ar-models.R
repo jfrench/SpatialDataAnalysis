@@ -8,25 +8,33 @@ library(patchwork)
 # read in data
 # data related to leukeumia cases in 8 counties in upstate New York
 # POP8 is the county population
-# PEXPOSURE: log(100 * inverse distance between each census tract centroid and the nearest
+# PEXPOSURE: log(100 * inverse distance between each census
+#            tract centroid and the nearest
 #            inactive hazardous waste site containing TCE)
 # PCTAGE65P: percentage of the population older than 65
 # PCTOWNHOME: percentage of the population that owns their home
-# Z: log(1000(Y_i + 1)/n_i), where Y_i is the number of leukeumia cases and n_i is the
-# population size for the counties.
+# Z: log(1000(Y_i + 1)/n_i), where Y_i is the number of
+#    leukeumia cases and n_i is the population size for
+#    the counties.
 NY8 <- sf::st_read("./data/NY_data/NY8_utm18.shp")
 TCE <- sf::st_read("./data/NY_data/TCE.shp") # locations of inactive hazardous waste sites storing TCE
-NY_nb <- spdep::read.gal("./data/NY_data/NY_nb.gal", region.id = row.names(NY8),
+NY_nb <- spdep::read.gal("./data/NY_data/NY_nb.gal",
+                         region.id = row.names(NY8),
                          override.id = TRUE)
 cities <- sf::st_read("./data/NY_data/NY8cities.shp")
 
 # plot of regions with TCE sites (and name)
 par(mfrow = c(1, 2))
-plot(NY8$geometry, border="grey60", axes = TRUE, main = "cities")
-text(st_coordinates(cities), labels=as.character(cities$names), font=2, cex=0.6)
-plot(NY8$geometry, border="grey60", axes=TRUE, main = "factories")
+plot(NY8$geometry, border="grey60", axes = TRUE,
+     main = "cities")
+text(st_coordinates(cities),
+     labels=as.character(cities$names),
+     font=2, cex=0.6)
+plot(NY8$geometry, border="grey60", axes=TRUE,
+     main = "factories")
 plot(TCE$geometry, pch=19, cex=0.7, add = TRUE)
-text(st_coordinates(TCE), labels=as.character(TCE$name), cex=0.7,
+text(st_coordinates(TCE), labels=as.character(TCE$name),
+     cex=0.7,
      font=1, pos=c(4,1,4,1,4,4,4,2,3,4,2), offset=0.3)
 par(mfrow = c(1, 1))
 
@@ -109,8 +117,8 @@ nysarw <- spautolm(Z ~ PEXPOSURE + PCTAGE65P + PCTOWNHOME,
                    data = NY8, listw = NYlistw,
                    weights = POP8)
 summary(nysarw)
-# no traces of spatial autocorrelation after adjusting for the
-# heterogeneous population sizes
+# no traces of spatial autocorrelation after adjusting for
+# the heterogeneous population sizes
 
 # separate trend from stochastic component
 NY8$sarw_trend <- nysarw$fit$signal_trend
