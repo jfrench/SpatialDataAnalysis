@@ -79,6 +79,10 @@ title("L plot for affected grave sites, polygon")
 lplot(pppunpol, r = r)
 title("L plot for nonaffected grave sites, polygon")
 
+# get n and naf for simulations
+n <- pppol$n
+naf <- length(af)
+
 # test hypothesis that affected event locations are
 # clustered at any scale for 0 <= h <= 2000
 # in polygon domain
