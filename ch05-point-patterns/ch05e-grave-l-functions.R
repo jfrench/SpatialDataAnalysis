@@ -46,7 +46,7 @@ lplot <- function(x, nsim = 500, level = 0.95,
 
   lambda <- summary(x)$intensity
   win <- x$window
-  lsim <- pbapply::pblapply(1:nsim, FUN = function(i) {
+  lsim <- pbapply::pblapply(seq_len(nsim), FUN = function(i) {
     # generate CSR process based on observed data
     xsim <- spatstat.random::rpoispp(lambda, win = win)
     # estimate L for simulated point pattern
@@ -80,7 +80,6 @@ lplot <- function(x, nsim = 500, level = 0.95,
   lines(r, qlo - r, lty = 1)
   lines(r, qhi - r, lty = 1)
 }
-
 
 ## Are event locations clustered in the rectangle?
 ## Fix the number of events in the study area
