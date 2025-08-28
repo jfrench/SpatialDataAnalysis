@@ -167,6 +167,6 @@ Tsim <- pbapply::pbsapply(1:499, FUN = function(i) {
 
 # proportion of simulated test statistics
 # as extreme as one observed
-# the observed pattern is relative consistent with a random
-# labeling of affected
+# the observed pattern is relatively consistent with a random
+# labeling of affected event locations
 mean(c(Tsim, Tobs) >= Tobs)

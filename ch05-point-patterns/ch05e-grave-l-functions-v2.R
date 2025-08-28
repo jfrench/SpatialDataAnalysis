@@ -48,7 +48,7 @@ lplot <- function(x, nsim = 499, level = 0.95,
   e_tol = envelope(e_outer, fun = spatstat.explore::Lest,
                    nsim = nsim,
                    nrank = floor((1 - level) * (nsim + 1)/2))
-  plot(e_outer, fmla = . - r ~ r, legend = FALSE)
+  plot(e_outer, fmla = . - r ~ r, legend = FALSE, main = "")
   plot(e_tol, fmla = . - r ~ r, shadecol = "lightgrey", add = TRUE)
 }
 
