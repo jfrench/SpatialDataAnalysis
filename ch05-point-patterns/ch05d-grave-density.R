@@ -27,26 +27,25 @@ bw.scott(grave[un,])
 
 # density estimated for affected and unaffected groups
 # using associated bandwidths from Scott's rule
-iaf <-  spdensity(grave[af,], sigma = c(buaf, bvaf))
-iun <-  spdensity(grave[un,], sigma = c(buun, bvun))
+daf <-  spdensity(grave[af,], sigma = c(buaf, bvaf))
+dun <-  spdensity(grave[un,], sigma = c(buun, bvun))
 
 # plot perspective and contour plots of estimated density for affected sites
 par(mfrow = c(1, 2))
-persp(iaf, theta = 45, phi = 35, xlab = "u", ylab = "v", zlab = "density", main = "Estimated intensity function")
-contour(iaf, xlab = "u", ylab = "v", main = "Affected grave locations")
+contour(daf, xlab = "u", ylab = "v", main = "Affected grave locations")
 points(grave, pch = ".")
 
 # plot perspective and contour plots of estimated density for unaffected sites
 par(mfrow = c(1, 2))
-persp(iun, theta = 45, phi = 35, xlab = "u", ylab = "v", zlab = "density", main = "Estimated intensity function")
-contour(iun, xlab = "u", ylab = "v", main = "Unaffected grave locations")
+persp(dun, theta = 45, phi = 35, xlab = "u", ylab = "v", zlab = "density", main = "Estimated intensity function")
+contour(dun, xlab = "u", ylab = "v", main = "Unaffected grave locations")
 points(grave, pch = ".")
 
 # plot perspective and contour plots of estimated density for unaffected sites
 par(mfrow = c(1, 2))
-contour(iaf, xlab = "u", ylab = "v", main = "Affected")
+contour(daf, xlab = "u", ylab = "v", main = "Affected")
 points(grave, pch = ".")
-contour(iun, xlab = "u", ylab = "v", main = "Unaffected")
+contour(dun, xlab = "u", ylab = "v", main = "Unaffected")
 points(grave, pch = ".")
 
 par(mfrow = c(1, 1))
