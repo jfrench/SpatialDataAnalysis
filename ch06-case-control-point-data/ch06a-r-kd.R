@@ -22,7 +22,7 @@ r700 = logrr(grave, case = "affected", sigma = 700)
 # contour plot of r700 (lty and lwd determined
 # by experimentation)
 contour(r700, lty = c(1, 1, 1, 1, 2, 1),
-        lwd = c(1, 1, 1, 1, 1, 2), main = "")
+        lwd = c(1, 1, 1, 1, 2, 1), main = "")
 title("Gaussian kernel, Bandwidth = 700")
 
 # calculate log ratio of spatial densities for bandwidth = 350
@@ -30,7 +30,7 @@ f350 = spdensity(grave[af, ], sigma = 350)
 g350 = spdensity(grave[-af,], sigma = 350)
 r350 = logrr(grave, case = "affected", sigma = 350)
 # contour plot of log ratio of spatial densities
-contour(r350, lty = c(2, 1, 1, 1, 1), main = "")
+contour(r350, lty = c(1, 1, 2, 1, 1, 1, 1, 1), main = "")
 # construct 95% tolerance envelopes for log relative risk
 # when bandwidth = 350
 if (!file.exists("renv350.rda")) {
