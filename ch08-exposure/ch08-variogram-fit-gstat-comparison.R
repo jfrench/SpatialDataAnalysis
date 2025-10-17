@@ -21,9 +21,10 @@ gammahat <- vhat$gamma # gammahat
 nbins <- vhat$np # number of pairs in each bin
 
 ### Table 8.1 fit variogram model using WRSS
-# estimated exponential model with starting values c = .25, a = 30, c0 = .05
+# estimated exponential model with starting values
+# c = .25, a = 30, c0 = .05
 fitexp = fit.variogram(vhat,
-                       vgm(.25, "Exp", 30, .05),
+                       model = vgm(.25, "Exp", 30, .05),
                        fit.method = 2)
 fitexp #c = 0.211, a = 33.18, c0 = 0.042
 # plot variogram with estimated exponential model
@@ -37,8 +38,11 @@ vfit <- function(theta) {
   # evaluate exponential model
   gammamod <- theta[3] + theta[1] * (1 - exp(-h/theta[2]))
   # compute wrss
-  sum(nbins/gammamod^2 * (gammahat - gammamod)^2)/2
+  sum(nbins/gammamod^2 * (gammahat - gammamod)^2)
 }
+
+# wrss for optimal model as chosen by gstat
+vfit(c(0.211, 33.18, 0.042))
 
 # fit exponential model
 optim(par = c(0.25, 30, 0.05),
@@ -46,4 +50,4 @@ optim(par = c(0.25, 30, 0.05),
       lower = c(0.001, 0.001, 0.001),
       upper = c(1, 1000, 1),
       method = "L-BFGS-B")
-
+# c = 0.28, a = 83.75, c0 = 0.08 (more similar to geoR)

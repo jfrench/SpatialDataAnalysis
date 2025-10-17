@@ -1,5 +1,5 @@
 library(spdep)
-library(rgdal)
+library(sf)
 library(smerc)
 
 # read shapefile for new york counties

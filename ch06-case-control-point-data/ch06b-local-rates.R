@@ -6,7 +6,7 @@ data(grave)
 
 # perform test using spatial scan statistic
 # use group name to select case group
-scan = spscan.test(grave, nsim = 999, case = "affected")
+scan = spscan.test(grave, nsim = 999, case = "affected", alpha = 0.9)
 # summary of scan test results
 summary(scan)
 # plot scan test results
@@ -20,7 +20,7 @@ clusters(scan)
 
 # setup workers for parallelization
 # use 2 workers
-cl <- parallel::makeCluster(getOption("cl.cores", 2))
+cl <- parallel::makeCluster(getOption("cl.cores", 4))
 
 # if there were more than 1 cluster ....
 scan2 = spscan.test(grave, nsim = 999, case = "affected",

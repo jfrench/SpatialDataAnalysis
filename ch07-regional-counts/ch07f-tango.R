@@ -26,7 +26,7 @@ w20 <- dweights(coords, kappa = 20)
 
 # # Code to plot weights and "effective range"
 # plotdist <- 0:max(d)
-# kappa <- 1
+# kappa <- 20
 # plot(plotdist,
 #      exp(-plotdist/kappa),type="l",xlab="Distance",ylab="exp(-distance/kappa)",
 #     cex.lab=1.5,cex.axis=1.25,ylim=c(0,1))
@@ -55,7 +55,10 @@ gof <- c(tango_1$gof,tango_7$gof,
 sa <- c(tango_1$sa,tango_7$sa,
         tango_10$sa,tango_15$sa,
         tango_20$sa)
-plot(gof, sa)
+plot(sa, gof, ylab = "goodness-of-fit",
+     xlab = "spatial autocorrelation",
+     type = "n")
+text(sa, gof, labels = c("1", "7", "10", "15", "20"))
 # gof stays the same since all sets of weights have w_{ii} =
 # 1 the difference between value's of tango's index for
 # different values of kappa derives entirely from
