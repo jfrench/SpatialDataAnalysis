@@ -45,9 +45,9 @@ vfit <- function(theta) {
 vfit(c(0.211, 33.18, 0.042))
 
 # fit exponential model
-optim(par = c(0.25, 30, 0.05),
-      fn = vfit,
-      lower = c(0.001, 0.001, 0.001),
-      upper = c(1, 1000, 1),
-      method = "L-BFGS-B")
+optim(par = c(0.25, 30, 0.05), # starting values
+      fn = vfit, # objective function
+      lower = c(0.001, 0.001, 0.001), # lower constraints
+      upper = c(1, 1000, 1), # upper constraints
+      method = "L-BFGS-B") # optimization method
 # c = 0.28, a = 83.75, c0 = 0.08 (more similar to geoR)
