@@ -85,9 +85,16 @@ plot(variog3)
 # show fit of anisotropic model the numbers come from output
 # of the likfit function from the geoR package note that
 # likfit parameterized a parameter in terms of aminor, not
-# amajor so we have to convert it to amaj (amin * psiR).  We
+# amajor so we have to convert it to amax (amin * psiR).  We
 # need to convert the ratio in anis to the minor/major
 # ratio, i.e., 1/psiR
+# from geoR
+# muhat = 7.19, c0 = 0.0016, c = 0.1880,
+# amin = 10.82, psiA = 70 degrees, psiR = 1.91
+
+# Thus, amax = 10.82 * 1.91
+# vgm(c, "model", amax = amin * psiR, c0),
+#     anis = c(angle, 1/psiR = amin/amax)
 vgmaniso = vgm(.188, "Exp", 10.82*1.91, .0016,
                anis = c(70, 1/1.91))
 plot(variog3, vgmaniso)

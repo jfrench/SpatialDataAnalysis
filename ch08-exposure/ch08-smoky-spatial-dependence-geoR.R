@@ -50,8 +50,10 @@ lines(fitexpb)
 
 ### Table 8.2 # fit variogram model using WRSS
 # estimated spherical model with starting values c = .25, a = 30, c0 = .05
-fitsphb = variofit(variog2b, ini.cov.pars = c(.25, 30), nugget = 0.05,
-                   cov.model = "spherical", weights = "cressie")
+fitsphb = variofit(variog2b, ini.cov.pars = c(.25, 30),
+                   nugget = 0.05,
+                   cov.model = "spherical",
+                   weights = "cressie")
 fitsphb  # estimated c0 = 0.0558, c = 0.1683, a = 62.6156
 fitsphb$value # wrss of fit
 # the spherical model fits worse since its WRSS = 30.44
@@ -68,7 +70,8 @@ fitmatb = variofit(variog2b, ini.cov.pars = c(.25, 30),
                    cov.model = "matern",
                    weights = "cressie",
                    fix.kappa = FALSE)
-fitmatb  # estimated c0 = 0.0529, c = 0.1761, a = 16.36, smoothness =
+fitmatb  # estimated c0 = 0.0529, c = 0.1761, a = 16.36,
+         # smoothness = 1
 fitmatb$value # wrss of fit 29.875
 # the matern model fits the best since it has the smallest RSS
 plot(variog2b)
@@ -100,6 +103,8 @@ lfit_mat = likfit(geosmoky, ini.cov.pars = c(.25, 30),
                   fix.kappa = FALSE)
 lfit_mat # c = .1841, a = 7.1482, c0 = 0,
          # smoothness = 0.6872, muhat = 7.1663
+# summarize fit
+summary(lfit_mat)
 # Maximised Likelihood:
 #   log.L n.params      AIC      BIC
 # "-26.71"      "5"  "63.42"  "75.01"
@@ -130,10 +135,11 @@ plot(variog3b)
 # in model 1, both are fixed, in model 2, the psiA is fixed, and in model 3, neither are fixed
 
 # estimate an anisotropic exponential covariance model with fixed angle and ratio
-# 70 is the angle chosen in the book example.t
+# 70 is the angle chosen in the book example
 # the /180*pi converts the angle to radians
-# ini.cov.pars = c(c, amaj), nugget = c0
-# initial angle of 70 degrees, initial amaj/amin = 3
+# ini.cov.pars = c(c, amax), nugget = c0
+# initial angle of 70 degrees, initial amax/amin = 3
+# psiA = phi (angle of direction of amax)
 lfit1 = likfit(geosmoky, ini.cov.pars = c(.25, 30),
                nugget = 0.05,
                cov.model = "exponential",
@@ -143,7 +149,7 @@ lfit1 # muhat = 7.2349, c0 = 0.0044, c = 0.2198,
       # amin = 9.4746, psiA = 70 degrees, psiR = 3
 
 # estimate an anisotropic exponential covariance model with fixed angle but also estimates
-# the ratio of amaj/amin (amax/amin). Use fix.psiR = FALSE.
+# the ratio of amax/amin. Use fix.psiR = FALSE.
 lfit2 = likfit(geosmoky, ini.cov.pars = c(.25, 30),
                nugget = 0.05,
                cov.model = "exponential",
@@ -153,8 +159,11 @@ lfit2 = likfit(geosmoky, ini.cov.pars = c(.25, 30),
 lfit2 # muhat = 7.19, c0 = 0.0016, c = 0.1880,
       # amin = 10.82, psiA = 70 degrees, psiR = 1.91
 
-# estimate an anisotropic exponential covariance model with both angle and ratio
-# being estimated. Note fix.psiR (ratio) = FALSE, and fix.psiA = FALSE.
+# Thus, amax = 10.82 * 1.91
+
+# estimate an anisotropic exponential covariance model with
+# both angle and ratio being estimated.
+# Note fix.psiR (ratio) = FALSE, and fix.psiA = FALSE.
 lfit3 = likfit(geosmoky, ini.cov.pars = c(.25, 30),
                nugget = 0.05,
                cov.model = "exponential",
@@ -173,12 +182,12 @@ lfit4 = likfit(geosmoky, ini.cov.pars = c(.25, 30),
                psiA = 70/180*pi, psiR = 3,
                fix.psiR = FALSE, fix.psiA = FALSE,
                fix.kappa = FALSE)
-lfit4 # muhat = 7.61, c0 = 0, c = 2.54, amin = 903.01,
+lfit4 # muhat = 7.61, c0 = 0, c = 2.29, amin = 777.8,
       # kappa = 0.35, psiA = 0.85 radians, psiR = 2.93
 
 # compare AIC/BIC values.  Model 3 is best in terms of AIC since it has the
 # smallest AIC, but we'll use model 2 because that's what the book uses
-summary(lfit1) # AIC = 60.92
+summary(lfit1) # AIC = 60.82
 summary(lfit2) # AIC = 61.81, c = .188, amin = 10.82, c0= 0.0016, amaj/amin = 1.91, degrees = 70
 summary(lfit3) # AIC = 60.73
 summary(lfit4) # AIC = 62.29
