@@ -77,7 +77,7 @@ V = cov.exp(d, psill = 1, a = 0.2475395, c0 = 0) + 0 * diag(N)
 # residuals
 e = y - X %*% betatilde
 (psilltilde = crossprod(e, solve(V, e))/N)
-(c0 = 0/psilltilde)
+(c0 = 0 * psilltilde)
 
 # combined ml estimates
 c(beta = betatilde, psill = psilltilde, a = 0.2475395, c0 = c0)

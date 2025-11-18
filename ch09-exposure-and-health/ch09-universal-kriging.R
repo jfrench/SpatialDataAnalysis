@@ -55,7 +55,7 @@ uksmoky = gstat(id = "ph",
                 model = v)
 
 # make universal kriging predictions on grid
-uk = predict(uksmoky, pdf)
+uk = predict(uksmoky, newdata = pdf)
 
 # plot prediction from uk
 plot(uk["ph.pred"], pal = hcl.colors)
@@ -64,7 +64,7 @@ plot(uk["ph.var"], pal = hcl.colors)
 # evaluate covariance matrix for observed data
 # determine distances
 d = as.matrix(dist(st_coordinates(smoky)))
-# determine estimated covariance matrix
+# determine estimated covariance matrix of the observed data
 C = .131 * exp(-d/18.97) + 0.043 * diag(nrow(st_coordinates(smoky)))
 # create X matrix
 X = cbind(1, st_coordinates(smoky))

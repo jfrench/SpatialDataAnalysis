@@ -105,7 +105,8 @@ ggplot(psf) + geom_sf(aes(col = ph.pred)) +
   facet_wrap(~ type) +
   ggtitle("kriging predictions")
 
-# plot predictions from indicator kriging model
+# plot kriging variances for standard and filtered
+# kriging
 ggplot(psf) + geom_sf(aes(col = ph.var)) +
   scale_color_viridis_c() +
   facet_wrap(~ type) +
@@ -113,12 +114,14 @@ ggplot(psf) + geom_sf(aes(col = ph.var)) +
 
 #### Example of indicator kriging
 # indicator kriging for ph > 8
+# (ph > 0) produces logical values and the + 0 converst
+# TRUE -> 1 and FALSE -> 0.
 # ordinary indicator kriging
-ganiso_i1 = gstat(id = "ph", formula = (ph > 8 + 0) ~ 1,
+ganiso_i1 = gstat(id = "ph", formula = (ph > 8) + 0 ~ 1,
                   data = smoky, model = v1)
 iok = predict(ganiso_i1, newdata = grid)
 # filtered indicator kriging
-ganiso_i2 = gstat(id = "ph", formula = (ph > 8 + 0) ~ 1,
+ganiso_i2 = gstat(id = "ph", formula = (ph > 8) + 0 ~ 1,
                   data = smoky, model = v2)
 ifk = predict(ganiso_i2, newdata = grid)
 

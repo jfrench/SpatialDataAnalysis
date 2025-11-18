@@ -44,7 +44,8 @@ oklog$lead.pred = epred
 plot(oklog["lead.pred"], pal = hcl.colors)
 
 # lognormal prediction
-# lambda = 0 means use a log transform.  Related to box-cox transformation
+# lambda = 0 means use a log transform.
+# Related to box-cox transformation
 olk = krigeTg(lead ~ 1,
               locations = meuse,
               newdata = meuse_grid,
